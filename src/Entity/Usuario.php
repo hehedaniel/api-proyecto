@@ -57,6 +57,11 @@ class Usuario
      */
     private $ultimoPeso;
 
+    /**
+     * @ORM\OneToOne(targetEntity=ConsumoDia::class, mappedBy="idUsuario", cascade={"persist", "remove"})
+     */
+    private $consumoDia;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -159,6 +164,23 @@ class Usuario
         }
 
         $this->ultimoPeso = $ultimoPeso;
+
+        return $this;
+    }
+
+    public function getConsumoDia(): ?ConsumoDia
+    {
+        return $this->consumoDia;
+    }
+
+    public function setConsumoDia(ConsumoDia $consumoDia): self
+    {
+        // set the owning side of the relation if necessary
+        if ($consumoDia->getIdUsuario() !== $this) {
+            $consumoDia->setIdUsuario($this);
+        }
+
+        $this->consumoDia = $consumoDia;
 
         return $this;
     }
