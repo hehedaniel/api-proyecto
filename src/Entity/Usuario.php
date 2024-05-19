@@ -79,11 +79,17 @@ class Usuario
      */
     private $receta;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Receta::class, mappedBy="usuarioCreador")
+     */
+    private $recetaRegistrada;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
         $this->alimentosPropuestos = new ArrayCollection();
         $this->receta = new ArrayCollection();
+        $this->recetaRegistrada = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -283,6 +289,36 @@ class Usuario
     public function removeRecetum(Receta $recetum): self
     {
         $this->receta->removeElement($recetum);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Receta>
+     */
+    public function getRecetaRegistrada(): Collection
+    {
+        return $this->recetaRegistrada;
+    }
+
+    public function addRecetaRegistrada(Receta $recetaRegistrada): self
+    {
+        if (!$this->recetaRegistrada->contains($recetaRegistrada)) {
+            $this->recetaRegistrada[] = $recetaRegistrada;
+            $recetaRegistrada->setUsuarioCreador($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRecetaRegistrada(Receta $recetaRegistrada): self
+    {
+        if ($this->recetaRegistrada->removeElement($recetaRegistrada)) {
+            // set the owning side to null (unless already changed)
+            if ($recetaRegistrada->getUsuarioCreador() === $this) {
+                $recetaRegistrada->setUsuarioCreador(null);
+            }
+        }
 
         return $this;
     }

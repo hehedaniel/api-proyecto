@@ -79,6 +79,12 @@ class Receta
      */
     private $usuariosTomadores;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="recetaRegistrada")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $usuarioCreador;
+
     public function __construct()
     {
         $this->usuariosTomadores = new ArrayCollection();
@@ -244,6 +250,18 @@ class Receta
         if ($this->usuariosTomadores->removeElement($usuariosTomadore)) {
             $usuariosTomadore->removeRecetum($this);
         }
+
+        return $this;
+    }
+
+    public function getUsuarioCreador(): ?Usuario
+    {
+        return $this->usuarioCreador;
+    }
+
+    public function setUsuarioCreador(?Usuario $usuarioCreador): self
+    {
+        $this->usuarioCreador = $usuarioCreador;
 
         return $this;
     }
