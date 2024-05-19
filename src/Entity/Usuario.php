@@ -69,9 +69,15 @@ class Usuario
      */
     private $alimentos;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Alimento::class, mappedBy="usuarioProponedor")
+     */
+    private $alimentosPropuestos;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
+        $this->alimentosPropuestos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -217,6 +223,36 @@ class Usuario
     public function removeAlimento(Alimento $alimento): self
     {
         $this->alimentos->removeElement($alimento);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Alimento>
+     */
+    public function getAlimentosPropuestos(): Collection
+    {
+        return $this->alimentosPropuestos;
+    }
+
+    public function addAlimentosPropuesto(Alimento $alimentosPropuesto): self
+    {
+        if (!$this->alimentosPropuestos->contains($alimentosPropuesto)) {
+            $this->alimentosPropuestos[] = $alimentosPropuesto;
+            $alimentosPropuesto->setUsuarioProponedor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlimentosPropuesto(Alimento $alimentosPropuesto): self
+    {
+        if ($this->alimentosPropuestos->removeElement($alimentosPropuesto)) {
+            // set the owning side to null (unless already changed)
+            if ($alimentosPropuesto->getUsuarioProponedor() === $this) {
+                $alimentosPropuesto->setUsuarioProponedor(null);
+            }
+        }
 
         return $this;
     }

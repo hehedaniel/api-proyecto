@@ -79,6 +79,12 @@ class Alimento
      */
     private $usuarios;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="alimentosPropuestos")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $usuarioProponedor;
+
     public function __construct()
     {
         $this->usuarios = new ArrayCollection();
@@ -244,6 +250,18 @@ class Alimento
         if ($this->usuarios->removeElement($usuario)) {
             $usuario->removeAlimento($this);
         }
+
+        return $this;
+    }
+
+    public function getUsuarioProponedor(): ?Usuario
+    {
+        return $this->usuarioProponedor;
+    }
+
+    public function setUsuarioProponedor(?Usuario $usuarioProponedor): self
+    {
+        $this->usuarioProponedor = $usuarioProponedor;
 
         return $this;
     }
