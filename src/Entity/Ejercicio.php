@@ -65,6 +65,11 @@ class Ejercicio
      */
     private $usuarioProponedor;
 
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $valorMET;
+
     public function __construct()
     {
         $this->enlaces = new ArrayCollection();
@@ -213,6 +218,18 @@ class Ejercicio
     public function setUsuarioProponedor(?Usuario $usuarioProponedor): self
     {
         $this->usuarioProponedor = $usuarioProponedor;
+
+        return $this;
+    }
+
+    public function getValorMET(): ?float
+    {
+        return $this->valorMET;
+    }
+
+    public function setValorMET(float $valorMET): self
+    {
+        $this->valorMET = $valorMET;
 
         return $this;
     }
