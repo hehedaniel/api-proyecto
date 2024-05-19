@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RecetaRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -71,6 +73,16 @@ class Receta
      * @ORM\Column(type="text")
      */
     private $imagen;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Usuario::class, mappedBy="receta")
+     */
+    private $usuariosTomadores;
+
+    public function __construct()
+    {
+        $this->usuariosTomadores = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -205,6 +217,33 @@ class Receta
     public function setImagen(string $imagen): self
     {
         $this->imagen = $imagen;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Usuario>
+     */
+    public function getUsuariosTomadores(): Collection
+    {
+        return $this->usuariosTomadores;
+    }
+
+    public function addUsuariosTomadore(Usuario $usuariosTomadore): self
+    {
+        if (!$this->usuariosTomadores->contains($usuariosTomadore)) {
+            $this->usuariosTomadores[] = $usuariosTomadore;
+            $usuariosTomadore->addRecetum($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuariosTomadore(Usuario $usuariosTomadore): self
+    {
+        if ($this->usuariosTomadores->removeElement($usuariosTomadore)) {
+            $usuariosTomadore->removeRecetum($this);
+        }
 
         return $this;
     }

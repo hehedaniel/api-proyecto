@@ -74,10 +74,16 @@ class Usuario
      */
     private $alimentosPropuestos;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Receta::class, inversedBy="usuariosTomadores")
+     */
+    private $receta;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
         $this->alimentosPropuestos = new ArrayCollection();
+        $this->receta = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -253,6 +259,30 @@ class Usuario
                 $alimentosPropuesto->setUsuarioProponedor(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Receta>
+     */
+    public function getReceta(): Collection
+    {
+        return $this->receta;
+    }
+
+    public function addRecetum(Receta $recetum): self
+    {
+        if (!$this->receta->contains($recetum)) {
+            $this->receta[] = $recetum;
+        }
+
+        return $this;
+    }
+
+    public function removeRecetum(Receta $recetum): self
+    {
+        $this->receta->removeElement($recetum);
 
         return $this;
     }
