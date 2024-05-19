@@ -32,6 +32,12 @@ class Peso
      */
     private $imc;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Usuario::class, inversedBy="ultimoPeso", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $idUsuario;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -69,6 +75,18 @@ class Peso
     public function setImc(float $imc): self
     {
         $this->imc = $imc;
+
+        return $this;
+    }
+
+    public function getIdUsuario(): ?Usuario
+    {
+        return $this->idUsuario;
+    }
+
+    public function setIdUsuario(Usuario $idUsuario): self
+    {
+        $this->idUsuario = $idUsuario;
 
         return $this;
     }

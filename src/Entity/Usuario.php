@@ -52,6 +52,11 @@ class Usuario
      */
     private $objetivo_num;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Peso::class, mappedBy="idUsuario", cascade={"persist", "remove"})
+     */
+    private $ultimoPeso;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -137,6 +142,23 @@ class Usuario
     public function setObjetivoNum(string $objetivo_num): self
     {
         $this->objetivo_num = $objetivo_num;
+
+        return $this;
+    }
+
+    public function getUltimoPeso(): ?Peso
+    {
+        return $this->ultimoPeso;
+    }
+
+    public function setUltimoPeso(Peso $ultimoPeso): self
+    {
+        // set the owning side of the relation if necessary
+        if ($ultimoPeso->getIdUsuario() !== $this) {
+            $ultimoPeso->setIdUsuario($this);
+        }
+
+        $this->ultimoPeso = $ultimoPeso;
 
         return $this;
     }
