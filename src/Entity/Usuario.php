@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UsuarioRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -61,6 +63,16 @@ class Usuario
      * @ORM\OneToOne(targetEntity=ConsumoDia::class, mappedBy="idUsuario", cascade={"persist", "remove"})
      */
     private $consumoDia;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Alimento::class, inversedBy="usuarios")
+     */
+    private $alimentos;
+
+    public function __construct()
+    {
+        $this->alimentos = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -181,6 +193,30 @@ class Usuario
         }
 
         $this->consumoDia = $consumoDia;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Alimento>
+     */
+    public function getAlimentos(): Collection
+    {
+        return $this->alimentos;
+    }
+
+    public function addAlimento(Alimento $alimento): self
+    {
+        if (!$this->alimentos->contains($alimento)) {
+            $this->alimentos[] = $alimento;
+        }
+
+        return $this;
+    }
+
+    public function removeAlimento(Alimento $alimento): self
+    {
+        $this->alimentos->removeElement($alimento);
 
         return $this;
     }

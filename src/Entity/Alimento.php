@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AlimentoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -71,6 +73,16 @@ class Alimento
      * @ORM\Column(type="text")
      */
     private $imagen;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Usuario::class, mappedBy="alimentos")
+     */
+    private $usuarios;
+
+    public function __construct()
+    {
+        $this->usuarios = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -205,6 +217,33 @@ class Alimento
     public function setImagen(string $imagen): self
     {
         $this->imagen = $imagen;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Usuario>
+     */
+    public function getUsuarios(): Collection
+    {
+        return $this->usuarios;
+    }
+
+    public function addUsuario(Usuario $usuario): self
+    {
+        if (!$this->usuarios->contains($usuario)) {
+            $this->usuarios[] = $usuario;
+            $usuario->addAlimento($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuario(Usuario $usuario): self
+    {
+        if ($this->usuarios->removeElement($usuario)) {
+            $usuario->removeAlimento($this);
+        }
 
         return $this;
     }
