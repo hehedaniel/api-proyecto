@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EjercicioRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -46,6 +48,16 @@ class Ejercicio
      * @ORM\Column(type="float")
      */
     private $caloriasQuemadas;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Enlace::class, mappedBy="idEjercicio")
+     */
+    private $enlaces;
+
+    public function __construct()
+    {
+        $this->enlaces = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -120,6 +132,36 @@ class Ejercicio
     public function setCaloriasQuemadas(float $caloriasQuemadas): self
     {
         $this->caloriasQuemadas = $caloriasQuemadas;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Enlace>
+     */
+    public function getEnlaces(): Collection
+    {
+        return $this->enlaces;
+    }
+
+    public function addEnlace(Enlace $enlace): self
+    {
+        if (!$this->enlaces->contains($enlace)) {
+            $this->enlaces[] = $enlace;
+            $enlace->setIdEjercicio($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnlace(Enlace $enlace): self
+    {
+        if ($this->enlaces->removeElement($enlace)) {
+            // set the owning side to null (unless already changed)
+            if ($enlace->getIdEjercicio() === $this) {
+                $enlace->setIdEjercicio(null);
+            }
+        }
 
         return $this;
     }

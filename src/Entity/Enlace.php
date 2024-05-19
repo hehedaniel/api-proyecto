@@ -22,6 +22,12 @@ class Enlace
      */
     private $enlace;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Ejercicio::class, inversedBy="enlaces")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $idEjercicio;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -35,6 +41,18 @@ class Enlace
     public function setEnlace(string $enlace): self
     {
         $this->enlace = $enlace;
+
+        return $this;
+    }
+
+    public function getIdEjercicio(): ?Ejercicio
+    {
+        return $this->idEjercicio;
+    }
+
+    public function setIdEjercicio(?Ejercicio $idEjercicio): self
+    {
+        $this->idEjercicio = $idEjercicio;
 
         return $this;
     }
