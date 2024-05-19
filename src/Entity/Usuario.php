@@ -84,12 +84,24 @@ class Usuario
      */
     private $recetaRegistrada;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Ejercicio::class, inversedBy="usuarioRealizador")
+     */
+    private $ejercicioRealizado;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Ejercicio::class, mappedBy="usuarioProponedor")
+     */
+    private $ejercicioPropuesto;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
         $this->alimentosPropuestos = new ArrayCollection();
         $this->receta = new ArrayCollection();
         $this->recetaRegistrada = new ArrayCollection();
+        $this->ejercicioRealizado = new ArrayCollection();
+        $this->ejercicioPropuesto = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -317,6 +329,60 @@ class Usuario
             // set the owning side to null (unless already changed)
             if ($recetaRegistrada->getUsuarioCreador() === $this) {
                 $recetaRegistrada->setUsuarioCreador(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ejercicio>
+     */
+    public function getEjercicioRealizado(): Collection
+    {
+        return $this->ejercicioRealizado;
+    }
+
+    public function addEjercicioRealizado(Ejercicio $ejercicioRealizado): self
+    {
+        if (!$this->ejercicioRealizado->contains($ejercicioRealizado)) {
+            $this->ejercicioRealizado[] = $ejercicioRealizado;
+        }
+
+        return $this;
+    }
+
+    public function removeEjercicioRealizado(Ejercicio $ejercicioRealizado): self
+    {
+        $this->ejercicioRealizado->removeElement($ejercicioRealizado);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ejercicio>
+     */
+    public function getEjercicioPropuesto(): Collection
+    {
+        return $this->ejercicioPropuesto;
+    }
+
+    public function addEjercicioPropuesto(Ejercicio $ejercicioPropuesto): self
+    {
+        if (!$this->ejercicioPropuesto->contains($ejercicioPropuesto)) {
+            $this->ejercicioPropuesto[] = $ejercicioPropuesto;
+            $ejercicioPropuesto->setUsuarioProponedor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEjercicioPropuesto(Ejercicio $ejercicioPropuesto): self
+    {
+        if ($this->ejercicioPropuesto->removeElement($ejercicioPropuesto)) {
+            // set the owning side to null (unless already changed)
+            if ($ejercicioPropuesto->getUsuarioProponedor() === $this) {
+                $ejercicioPropuesto->setUsuarioProponedor(null);
             }
         }
 

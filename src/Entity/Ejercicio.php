@@ -54,9 +54,21 @@ class Ejercicio
      */
     private $enlaces;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Usuario::class, mappedBy="ejercicioRealizado")
+     */
+    private $usuarioRealizador;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="ejercicioPropuesto")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $usuarioProponedor;
+
     public function __construct()
     {
         $this->enlaces = new ArrayCollection();
+        $this->usuarioRealizador = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -162,6 +174,45 @@ class Ejercicio
                 $enlace->setIdEjercicio(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Usuario>
+     */
+    public function getUsuarioRealizador(): Collection
+    {
+        return $this->usuarioRealizador;
+    }
+
+    public function addUsuarioRealizador(Usuario $usuarioRealizador): self
+    {
+        if (!$this->usuarioRealizador->contains($usuarioRealizador)) {
+            $this->usuarioRealizador[] = $usuarioRealizador;
+            $usuarioRealizador->addEjercicioRealizado($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuarioRealizador(Usuario $usuarioRealizador): self
+    {
+        if ($this->usuarioRealizador->removeElement($usuarioRealizador)) {
+            $usuarioRealizador->removeEjercicioRealizado($this);
+        }
+
+        return $this;
+    }
+
+    public function getUsuarioProponedor(): ?Usuario
+    {
+        return $this->usuarioProponedor;
+    }
+
+    public function setUsuarioProponedor(?Usuario $usuarioProponedor): self
+    {
+        $this->usuarioProponedor = $usuarioProponedor;
 
         return $this;
     }
