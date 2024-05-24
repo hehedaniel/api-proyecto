@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Alimento{% endblock %}
+
+{% block body %}
+    <h1>Alimento</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ alimento.id }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ alimento.nombre }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ alimento.descripcion }}</td>
+            </tr>
+            <tr>
+                <th>Marca</th>
+                <td>{{ alimento.marca }}</td>
+            </tr>
+            <tr>
+                <th>Cantidad</th>
+                <td>{{ alimento.cantidad }}</td>
+            </tr>
+            <tr>
+                <th>Proteinas</th>
+                <td>{{ alimento.proteinas }}</td>
+            </tr>
+            <tr>
+                <th>Grasas</th>
+                <td>{{ alimento.grasas }}</td>
+            </tr>
+            <tr>
+                <th>Carbohidratos</th>
+                <td>{{ alimento.carbohidratos }}</td>
+            </tr>
+            <tr>
+                <th>Azucares</th>
+                <td>{{ alimento.azucares }}</td>
+            </tr>
+            <tr>
+                <th>Vitaminas</th>
+                <td>{{ alimento.vitaminas }}</td>
+            </tr>
+            <tr>
+                <th>Minerales</th>
+                <td>{{ alimento.minerales }}</td>
+            </tr>
+            <tr>
+                <th>Imagen</th>
+                <td>{{ alimento.imagen }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_alimento_index') }}">back to list</a>
+
+    <a href="{{ path('app_alimento_edit', {'id': alimento.id}) }}">edit</a>
+
+    {{ include('alimento/_delete_form.html.twig') }}
+{% endblock %}

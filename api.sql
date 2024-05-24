@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 19-05-2024 a las 18:30:34
+-- Tiempo de generación: 20-05-2024 a las 20:15:36
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -20,6 +20,23 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `api`
 --
+
+DELIMITER $$
+--
+-- Funciones
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `registrar_consumo` (`p_id_usuario` INT, `p_fecha` DATE, `p_comida` VARCHAR(255), `p_cantidad` DOUBLE, `p_momento` VARCHAR(255)) RETURNS INT(11)  BEGIN
+    DECLARE insert_id INT;
+
+    INSERT INTO consumo_dia (id_usuario_id, fecha, comida, cantidad, momento)
+    VALUES (p_id_usuario, p_fecha, p_comida, p_cantidad, p_momento);
+
+    SET insert_id = LAST_INSERT_ID();
+
+    RETURN insert_id;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -75,7 +92,8 @@ CREATE TABLE `doctrine_migration_versions` (
 --
 
 INSERT INTO `doctrine_migration_versions` (`version`, `executed_at`, `execution_time`) VALUES
-('DoctrineMigrations\\Version20240519161847', '2024-05-19 18:27:17', 1181);
+('DoctrineMigrations\\Version20240519161847', '2024-05-19 18:27:17', 1181),
+('DoctrineMigrations\\Version20240519192038', '2024-05-19 21:21:19', 794);
 
 -- --------------------------------------------------------
 
@@ -91,7 +109,8 @@ CREATE TABLE `ejercicio` (
   `grupo_muscular` varchar(255) NOT NULL,
   `dificultad` varchar(255) NOT NULL,
   `instrucciones` longtext NOT NULL,
-  `calorias_quemadas` double NOT NULL
+  `calorias_quemadas` double NOT NULL,
+  `valor_met` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -194,7 +213,8 @@ CREATE TABLE `usuario_alimento` (
 
 CREATE TABLE `usuario_ejercicio` (
   `usuario_id` int(11) NOT NULL,
-  `ejercicio_id` int(11) NOT NULL
+  `ejercicio_id` int(11) NOT NULL,
+  `tiempo` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

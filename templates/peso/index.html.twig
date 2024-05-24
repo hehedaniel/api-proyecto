@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Peso index{% endblock %}
+
+{% block body %}
+    <h1>Peso index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Peso</th>
+                <th>Imc</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for peso in pesos %}
+            <tr>
+                <td>{{ peso.id }}</td>
+                <td>{{ peso.fecha ? peso.fecha|date('Y-m-d') : '' }}</td>
+                <td>{{ peso.peso }}</td>
+                <td>{{ peso.imc }}</td>
+                <td>
+                    <a href="{{ path('app_peso_show', {'id': peso.id}) }}">show</a>
+                    <a href="{{ path('app_peso_edit', {'id': peso.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_peso_new') }}">Create new</a>
+{% endblock %}

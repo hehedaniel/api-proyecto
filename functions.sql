@@ -56,3 +56,15 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+
+Para la base de datos que has recibido necesito que crees los insert necesarios y uses las funciones creadas para que se creen de forma correcta:
+
+Un usuario administrador, un usuario daniel y otro usuario de nombre y datos aleatorios, el usuario administrador debe tener los datos personales nulos y como rol true (es un booleano)
+
+Los dos usuarios normales, deben tener varios registros tanto de peso como de comidas consumidas
+
+Diferentes alimentos, ejercicios, y recetas propuestas y creadas por los dos usuarios existentes.
+
+Diferentes registros de actividad fisica
