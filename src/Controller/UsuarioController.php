@@ -10,6 +10,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use App\Util\RespuestaController;
+
+/*  TODO:
+    hacer que si hay varios resultados con el mismo nombre se muestren todos
+    hacer resto de metodos faltantes para el usuario
+*/
+
 /**
  * @Route("/usuario")
  */
@@ -20,80 +27,90 @@ class UsuarioController extends AbstractController
      */
     public function index(UsuarioRepository $usuarioRepository): Response
     {
-        return $this->render('usuario/index.html.twig', [
-            'usuarios' => $usuarioRepository->findAll(),
-        ]);
-    }
+        $usuarios = $usuarioRepository->findAll();
 
-    /**
-     * @Route("/new", name="app_usuario_new", methods={"GET", "POST"})
-     */
-    public function new(Request $request, UsuarioRepository $usuarioRepository): Response
-    {
-        $usuario = new Usuario();
-        $form = $this->createForm(UsuarioType::class, $usuario);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $usuarioRepository->add($usuario, true);
-
-            return $this->redirectToRoute('app_usuario_index', [], Response::HTTP_SEE_OTHER);
+        if(!$usuarios){
+            return RespuestaController::format("404", "No hay usuarios registrados");
         }
 
-        return $this->renderForm('usuario/new.html.twig', [
-            'usuario' => $usuario,
-            'form' => $form,
-        ]);
+        $usuariosJSON = [];
+
+        foreach ($usuarios as $usuario) {
+            $usuariosJSON[] = [
+                "id" => $usuario->getId(),
+                "nombre" => $usuario->getNombre(),
+                "apellidos" => $usuario->getApellidos(),
+                "correo" => $usuario->getCorreo(),
+                "correo_v" => $usuario->getCorreoV(),
+                "edad" => $usuario->getEdad(),
+                "objetivo_opt" => $usuario->getObjetivoOpt(),
+                "objetivo_num" => $usuario->getObjetivoNum(),
+            ];
+        }
+
+        return RespuestaController::format("200", $usuariosJSON);
+
     }
 
     /**
-     * @Route("/{id}", name="app_usuario_show", methods={"GET"})
+     * @Route("/{id}", name="app_usuario_buscar", methods={"GET"})
      */
-    public function show($id, UsuarioRepository $usuarioRepository): Response
+    public function buscar($id, UsuarioRepository $usuarioRepository): Response
     {
         $usuario = $usuarioRepository->find($id);
 
+        if (!$usuario) {
+            // Si no encuentro por ID busco por nombre
+            if ($usuarioRepository->findOneBy(['nombre' => $id])){
+                $usuario = $usuarioRepository->findOneBy(['nombre' => $id]);
+            }else {
+                return RespuestaController::format("404", "Usuario no encontrado");
+            }
+        }
+
         $usuarioJSON = [
-            "id" => $usuario->getEdad(),
-            "nombre" => $usuario->getNombre()
+            "id" => $usuario->getId(),
+            "nombre" => $usuario->getNombre(),
+            "apellidos" => $usuario->getApellidos(),
+            "correo" => $usuario->getCorreo(),
+            "correo_v" => $usuario->getCorreoV(),
+            "edad" => $usuario->getEdad(),
+            "objetivo_opt" => $usuario->getObjetivoOpt(),
+            "objetivo_num" => $usuario->getObjetivoNum(),
         ];
 
-        return $this->json($usuarioJSON);
+        $respuesta = RespuestaController::format("200", $usuarioJSON);
 
-        // return $this->render('usuario/show.html.twig', [
-        //     'usuario' => $usuarioRepository->find($id),
-        // ]);
+        return $respuesta;
     }
 
     /**
-     * @Route("/{id}/edit", name="app_usuario_edit", methods={"GET", "POST"})
+     * @Route("/new", name="app_usuario_new", methods={"POST"})
      */
-    public function edit(Request $request, Usuario $usuario, UsuarioRepository $usuarioRepository): Response
+    public function new(UsuarioRepository $usuarioRepository): Response
     {
-        $form = $this->createForm(UsuarioType::class, $usuario);
-        $form->handleRequest($request);
+        $usuarios = $usuarioRepository->findAll();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $usuarioRepository->add($usuario, true);
-
-            return $this->redirectToRoute('app_usuario_index', [], Response::HTTP_SEE_OTHER);
+        if(!$usuarios){
+            return RespuestaController::format("404", "No hay usuarios registrados");
         }
 
-        return $this->renderForm('usuario/edit.html.twig', [
-            'usuario' => $usuario,
-            'form' => $form,
-        ]);
-    }
+        $usuariosJSON = [];
 
-    /**
-     * @Route("/{id}", name="app_usuario_delete", methods={"POST"})
-     */
-    public function delete(Request $request, Usuario $usuario, UsuarioRepository $usuarioRepository): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$usuario->getId(), $request->request->get('_token'))) {
-            $usuarioRepository->remove($usuario, true);
+        foreach ($usuarios as $usuario) {
+            $usuariosJSON[] = [
+                "id" => $usuario->getId(),
+                "nombre" => $usuario->getNombre(),
+                "apellidos" => $usuario->getApellidos(),
+                "correo" => $usuario->getCorreo(),
+                "correo_v" => $usuario->getCorreoV(),
+                "edad" => $usuario->getEdad(),
+                "objetivo_opt" => $usuario->getObjetivoOpt(),
+                "objetivo_num" => $usuario->getObjetivoNum(),
+            ];
         }
 
-        return $this->redirectToRoute('app_usuario_index', [], Response::HTTP_SEE_OTHER);
+        return RespuestaController::format("200", $usuariosJSON);
     }
+
 }
