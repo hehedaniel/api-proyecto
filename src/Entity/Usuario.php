@@ -72,12 +72,12 @@ class Usuario
     /**
      * @ORM\OneToMany(targetEntity=Ejercicio::class, mappedBy="idUsuario")
      */
-    private $ejercicios;
+    // private $ejercicios;
 
-    public function __construct()
-    {
-        $this->ejercicios = new ArrayCollection();
-    }
+    // public function __construct()
+    // {
+    //     $this->ejercicios = new ArrayCollection();
+    // }
 
     public function getId(): ?int
     {
@@ -207,30 +207,30 @@ class Usuario
     /**
      * @return Collection<int, Ejercicio>
      */
-    public function getEjercicios(): Collection
-    {
-        return $this->ejercicios;
-    }
+    // public function getEjercicios(): Collection
+    // {
+    //     return $this->ejercicios;
+    // }
 
-    public function addEjercicio(Ejercicio $ejercicio): self
-    {
-        if (!$this->ejercicios->contains($ejercicio)) {
-            $this->ejercicios[] = $ejercicio;
-            $ejercicio->setIdUsuario($this);
-        }
+    // public function addEjercicio(Ejercicio $ejercicio): self
+    // {
+    //     if (!$this->ejercicios->contains($ejercicio)) {
+    //         $this->ejercicios[] = $ejercicio;
+    //         $ejercicio->setIdUsuario($this);
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    public function removeEjercicio(Ejercicio $ejercicio): self
-    {
-        if ($this->ejercicios->removeElement($ejercicio)) {
-            // set the owning side to null (unless already changed)
-            if ($ejercicio->getIdUsuario() === $this) {
-                $ejercicio->setIdUsuario(null);
-            }
-        }
+    // public function removeEjercicio(Ejercicio $ejercicio): self
+    // {
+    //     if ($this->ejercicios->removeElement($ejercicio)) {
+    //         // set the owning side to null (unless already changed)
+    //         if ($ejercicio->getIdUsuario() === $this) {
+    //             $ejercicio->setIdUsuario(null);
+    //         }
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 }
