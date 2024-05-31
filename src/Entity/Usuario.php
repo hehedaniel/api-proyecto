@@ -95,10 +95,16 @@ class Usuario
      */
     private $consumoDias;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Recetas::class, mappedBy="idUsuario", orphanRemoval=true)
+     */
+    private $recetas;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
         $this->consumoDias = new ArrayCollection();
+        $this->recetas = new ArrayCollection();
     }
 
     /**
@@ -320,6 +326,36 @@ class Usuario
             // set the owning side to null (unless already changed)
             if ($consumoDia->getIdUsuario() === $this) {
                 $consumoDia->setIdUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Recetas>
+     */
+    public function getRecetas(): Collection
+    {
+        return $this->recetas;
+    }
+
+    public function addReceta(Recetas $receta): self
+    {
+        if (!$this->recetas->contains($receta)) {
+            $this->recetas[] = $receta;
+            $receta->setIdUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceta(Recetas $receta): self
+    {
+        if ($this->recetas->removeElement($receta)) {
+            // set the owning side to null (unless already changed)
+            if ($receta->getIdUsuario() === $this) {
+                $receta->setIdUsuario(null);
             }
         }
 
