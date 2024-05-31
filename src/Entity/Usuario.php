@@ -86,6 +86,16 @@ class Usuario
     private $objetivo_num;
 
     /**
+     * @ORM\OneToMany(targetEntity=Alimento::class, mappedBy="idUsuario", orphanRemoval=true)
+     */
+    private $alimentos;
+
+    public function __construct()
+    {
+        $this->alimentos = new ArrayCollection();
+    }
+
+    /**
      * @ORM\OneToMany(targetEntity=Ejercicio::class, mappedBy="idUsuario")
      */
     // private $ejercicios;
@@ -249,4 +259,34 @@ class Usuario
 
     //     return $this;
     // }
+
+    /**
+     * @return Collection<int, Alimento>
+     */
+    public function getAlimentos(): Collection
+    {
+        return $this->alimentos;
+    }
+
+    public function addAlimento(Alimento $alimento): self
+    {
+        if (!$this->alimentos->contains($alimento)) {
+            $this->alimentos[] = $alimento;
+            $alimento->setIdUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlimento(Alimento $alimento): self
+    {
+        if ($this->alimentos->removeElement($alimento)) {
+            // set the owning side to null (unless already changed)
+            if ($alimento->getIdUsuario() === $this) {
+                $alimento->setIdUsuario(null);
+            }
+        }
+
+        return $this;
+    }
 }

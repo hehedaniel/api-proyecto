@@ -71,9 +71,7 @@ class UsuarioController extends AbstractController
 
         $usuarioJSON = $this->usuarioJSON($usuario);
 
-        $respuesta = RespuestaController::format("200", $usuarioJSON);
-
-        return $respuesta;
+        return RespuestaController::format("200", $usuarioJSON);
     }
 
     /**
@@ -84,7 +82,6 @@ class UsuarioController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data) {
-            var_dump($request->getContent());
             return RespuestaController::format("400", "No se han recibido datos");
         }
 
