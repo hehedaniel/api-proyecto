@@ -3,12 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Ejercicio;
-use App\Form\EjercicioType;
 use App\Repository\EjercicioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
+use App\Util\RespuestaController;
 
 /**
  * @Route("/ejercicio")
@@ -20,71 +21,141 @@ class EjercicioController extends AbstractController
      */
     public function index(EjercicioRepository $ejercicioRepository): Response
     {
-        return $this->render('ejercicio/index.html.twig', [
-            'ejercicios' => $ejercicioRepository->findAll(),
-        ]);
+        $ejercicios = $ejercicioRepository->findAll();
+
+        if (!$ejercicios) {
+            return RespuestaController::format("404", "No hay ejercicios registrados");
+        }
+
+        $ejerciciosJSON = [];
+
+        foreach ($ejercicios as $ejercicio) {
+            $ejerciciosJSON[] = $this->ejercicioJSON($ejercicio);
+        }
+
+        return RespuestaController::format("200", $ejerciciosJSON);
     }
 
     /**
-     * @Route("/new", name="app_ejercicio_new", methods={"GET", "POST"})
+     * @Route("/{id}", name="app_ejercicio_buscar", methods={"GET"})
      */
-    public function new(Request $request, EjercicioRepository $ejercicioRepository): Response
+    public function buscar($id, EjercicioRepository $ejercicioRepository): Response
     {
+        $ejercicio = $ejercicioRepository->find($id);
+
+        if (!$ejercicio) {
+            return RespuestaController::format("404", "Ejercicio no encontrado");
+        }
+
+        $ejercicioJSON = $this->ejercicioJSON($ejercicio);
+
+        return RespuestaController::format("200", $ejercicioJSON);
+    }
+
+    /**
+     * @Route("/crear", name="app_ejercicio_crear", methods={"POST"})
+     */
+    public function crear(Request $request, EjercicioRepository $ejercicioRepository): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
+        }
+
+        $existingEjercicio = $ejercicioRepository->findOneBy(['nombre' => $data['nombre']]);
+        if ($existingEjercicio) {
+            return RespuestaController::format("400", "Ya existe un ejercicio con el mismo nombre");
+        }
+
         $ejercicio = new Ejercicio();
-        $form = $this->createForm(EjercicioType::class, $ejercicio);
-        $form->handleRequest($request);
+        $ejercicio->setNombre($data['nombre']);
+        $ejercicio->setDescripcion($data['descripcion']);
+        $ejercicio->setGrupoMuscular($data['grupoMuscular']);
+        $ejercicio->setDificultad($data['dificultad']);
+        $ejercicio->setDificultad($data['instrucciones']);
+        $ejercicio->setValorMET($data['valorMET']);
+        $ejercicio->setIdUsuario($data['idUsuario']);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $ejercicioRepository->add($ejercicio, true);
+        $ejercicioRepository->add($ejercicio, true);
 
-            return $this->redirectToRoute('app_ejercicio_index', [], Response::HTTP_SEE_OTHER);
-        }
+        $ejercicioJSON = $this->ejercicioJSON($ejercicio);
 
-        return $this->renderForm('ejercicio/new.html.twig', [
-            'ejercicio' => $ejercicio,
-            'form' => $form,
-        ]);
+        return RespuestaController::format("200", $ejercicioJSON);
     }
 
     /**
-     * @Route("/{id}", name="app_ejercicio_show", methods={"GET"})
+     * @Route("/edit/{id}", name="app_ejercicio_edit", methods={"PUT"})
      */
-    public function show(Ejercicio $ejercicio): Response
+    public function editar($id, Request $request, EjercicioRepository $ejercicioRepository): Response
     {
-        return $this->render('ejercicio/show.html.twig', [
-            'ejercicio' => $ejercicio,
-        ]);
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
+        }
+
+        $ejercicio = $ejercicioRepository->find($id);
+
+        if (!$ejercicio) {
+            return RespuestaController::format("404", "Ejercicio no encontrado");
+        }
+
+        $ejercicio->setNombre($data['nombre']);
+        $ejercicio->setDescripcion($data['descripcion']);
+        $ejercicio->setGrupoMuscular($data['grupoMuscular']);
+        $ejercicio->setDificultad($data['dificultad']);
+        $ejercicio->setInstrucciones($data['instrucciones']);
+        $ejercicio->setValorMET($data['valorMET']);
+        $ejercicio->setIdUsuario($data['idUsuario']);
+
+        $ejercicioRepository->add($ejercicio, true);
+
+        $ejercicioJSON = $this->ejercicioJSON($ejercicio);
+
+        return RespuestaController::format("200", $ejercicioJSON);
+
     }
 
     /**
-     * @Route("/{id}/edit", name="app_ejercicio_edit", methods={"GET", "POST"})
+     * @Route("/delete", name="app_ejercicio_delete", methods={"DELETE"})
      */
-    public function edit(Request $request, Ejercicio $ejercicio, EjercicioRepository $ejercicioRepository): Response
+    public function eliminar(Request $request, EjercicioRepository $ejercicioRepository): Response
     {
-        $form = $this->createForm(EjercicioType::class, $ejercicio);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $ejercicioRepository->add($ejercicio, true);
+        $data = json_decode($request->getContent(), true);
 
-            return $this->redirectToRoute('app_ejercicio_index', [], Response::HTTP_SEE_OTHER);
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
         }
 
-        return $this->renderForm('ejercicio/edit.html.twig', [
-            'ejercicio' => $ejercicio,
-            'form' => $form,
-        ]);
+        if (isset($data['id'])) {
+            // Buscar ejercicio por ID
+            $ejercicio = $ejercicioRepository->find($data['id']);
+        }else {
+            return RespuestaController::format("400", "ID no recibidos");
+        }
+
+        if (!$ejercicio) {
+            return RespuestaController::format("404", "Ejercicio no encontrado");
+        }
+
+        $ejercicioRepository->remove($ejercicio, true);
+
+        return RespuestaController::format("200", "Ejercicio eliminado correctamente");
     }
 
-    /**
-     * @Route("/{id}", name="app_ejercicio_delete", methods={"POST"})
-     */
-    public function delete(Request $request, Ejercicio $ejercicio, EjercicioRepository $ejercicioRepository): Response
+    // Función para convertir un objeto Ejercicio a formato JSON
+    private function ejercicioJSON(Ejercicio $ejercicio)
     {
-        if ($this->isCsrfTokenValid('delete'.$ejercicio->getId(), $request->request->get('_token'))) {
-            $ejercicioRepository->remove($ejercicio, true);
-        }
+        $ejercicioJSON = [
+            "id" => $ejercicio->getId(),
+            "nombre" => $ejercicio->getNombre(),
+            "descripcion" => $ejercicio->getDescripcion(),
+            "grupoMuscular" => $ejercicio->getGrupoMuscular(),
+            // Agregar aquí los demás campos que desees incluir
+        ];
 
-        return $this->redirectToRoute('app_ejercicio_index', [], Response::HTTP_SEE_OTHER);
+        return $ejercicioJSON;
     }
 }

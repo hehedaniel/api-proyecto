@@ -77,9 +77,9 @@ class UsuarioController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="app_usuario_new", methods={"POST"})
+     * @Route("/crear", name="app_usuario_crear", methods={"POST"})
      */
-    public function new(Request $request, UsuarioRepository $usuarioRepository): Response
+    public function crear(Request $request, UsuarioRepository $usuarioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -116,9 +116,9 @@ class UsuarioController extends AbstractController
     }
 
     /**
-     * @Route("/edit/{id}", name="app_usuario_edit", methods={"PUT"})
+     * @Route("/editar/{id}", name="app_usuario_editar", methods={"PUT"})
      */
-    public function edit($id, Request $request, UsuarioRepository $usuarioRepository): Response
+    public function editar($id, Request $request, UsuarioRepository $usuarioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -152,16 +152,14 @@ class UsuarioController extends AbstractController
 
         $usuarioJSON = $this->usuarioJSON($usuario);
 
-        $respuesta = RespuestaController::format("200", $usuarioJSON);
-
-        return $respuesta;
+        return RespuestaController::format("200", $usuarioJSON);
     }
 
 
     /**
-     * @Route("/delete", name="app_usuario_delete", methods={"DELETE"})
+     * @Route("/eliminar", name="app_usuario_eliminar", methods={"DELETE"})
      */
-    public function delete(Request $request, UsuarioRepository $usuarioRepository): Response
+    public function eliminar(Request $request, UsuarioRepository $usuarioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
