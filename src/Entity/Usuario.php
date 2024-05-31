@@ -90,9 +90,15 @@ class Usuario
      */
     private $alimentos;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ConsumoDia::class, mappedBy="idUsuario")
+     */
+    private $consumoDias;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
+        $this->consumoDias = new ArrayCollection();
     }
 
     /**
@@ -284,6 +290,36 @@ class Usuario
             // set the owning side to null (unless already changed)
             if ($alimento->getIdUsuario() === $this) {
                 $alimento->setIdUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConsumoDia>
+     */
+    public function getConsumoDias(): Collection
+    {
+        return $this->consumoDias;
+    }
+
+    public function addConsumoDia(ConsumoDia $consumoDia): self
+    {
+        if (!$this->consumoDias->contains($consumoDia)) {
+            $this->consumoDias[] = $consumoDia;
+            $consumoDia->setIdUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsumoDia(ConsumoDia $consumoDia): self
+    {
+        if ($this->consumoDias->removeElement($consumoDia)) {
+            // set the owning side to null (unless already changed)
+            if ($consumoDia->getIdUsuario() === $this) {
+                $consumoDia->setIdUsuario(null);
             }
         }
 
