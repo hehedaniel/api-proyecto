@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Peso;
 use App\Form\PesoType;
 use App\Repository\PesoRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,11 +57,11 @@ class PesoController extends AbstractController
    /**
     * @Route("/crear", name="app_peso_crear", methods={"POST"})
     */
-   public function crear(Request $request, PesoRepository $pesoRepository): Response
+   public function crear(Request $request, PesoRepository $pesoRepository, UsuarioRepository $usuarioRepository): Response
    {
       $data = json_decode($request->getContent(), true);
 
-      if (!$data){
+      if (!$data) {
          return RespuestaController::format("400", "No se han recibido datos");
       }
 
@@ -68,8 +69,21 @@ class PesoController extends AbstractController
       $peso->setFecha(new \DateTime($data['fecha']));
       $peso->setHora(new \DateTime($data['hora']));
       $peso->setPeso($data['peso']);
-      $peso->setIMC($data['IMC']);
       $peso->setIdUsuario($data['idUsuario']);
+
+      $usuario = $usuarioRepository->find($data['idUsuario']);
+
+      if (!$usuario) {
+         return RespuestaController::format("400", "Usuario no encontrado");
+      }
+
+      if ($usuario->getAltura() != 0) {
+         $alturaEnMetros = $usuario->getAltura() / 100;
+         $imc = $data['peso'] / ($alturaEnMetros * $alturaEnMetros);
+         $peso->setIMC($imc);
+      } else {
+         return RespuestaController::format("400", "Error durante el cálculo del IMC");
+      }
 
       $pesoRepository->add($peso, true);
 
@@ -83,7 +97,7 @@ class PesoController extends AbstractController
    {
       $data = json_decode($request->getContent(), true);
 
-      if (!$data){
+      if (!$data) {
          return RespuestaController::format("400", "No se han recibido datos");
       }
 
@@ -112,7 +126,7 @@ class PesoController extends AbstractController
    {
       $data = json_decode($request->getContent(), true);
 
-      if (!$data){
+      if (!$data) {
          return RespuestaController::format("400", "No se han recibido datos");
       }
 

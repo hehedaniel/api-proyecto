@@ -105,12 +105,18 @@ class Usuario
      */
     private $pesos;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UsuarioRealizaEjercicio::class, mappedBy="idUsuario")
+     */
+    private $usuarioRealizaEjercicios;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
         $this->consumoDias = new ArrayCollection();
         $this->recetas = new ArrayCollection();
         $this->pesos = new ArrayCollection();
+        $this->usuarioRealizaEjercicios = new ArrayCollection();
     }
 
     /**
@@ -392,6 +398,36 @@ class Usuario
             // set the owning side to null (unless already changed)
             if ($peso->getIdUsuario() === $this) {
                 $peso->setIdUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UsuarioRealizaEjercicio>
+     */
+    public function getUsuarioRealizaEjercicios(): Collection
+    {
+        return $this->usuarioRealizaEjercicios;
+    }
+
+    public function addUsuarioRealizaEjercicio(UsuarioRealizaEjercicio $usuarioRealizaEjercicio): self
+    {
+        if (!$this->usuarioRealizaEjercicios->contains($usuarioRealizaEjercicio)) {
+            $this->usuarioRealizaEjercicios[] = $usuarioRealizaEjercicio;
+            $usuarioRealizaEjercicio->setIdUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuarioRealizaEjercicio(UsuarioRealizaEjercicio $usuarioRealizaEjercicio): self
+    {
+        if ($this->usuarioRealizaEjercicios->removeElement($usuarioRealizaEjercicio)) {
+            // set the owning side to null (unless already changed)
+            if ($usuarioRealizaEjercicio->getIdUsuario() === $this) {
+                $usuarioRealizaEjercicio->setIdUsuario(null);
             }
         }
 
