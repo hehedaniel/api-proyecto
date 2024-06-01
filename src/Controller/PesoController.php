@@ -19,14 +19,16 @@ use App\Util\RespuestaController;
 class PesoController extends AbstractController
 {
    /**
-    * @Route("/{$idUsuario}", name="app_peso_index", methods={"GET"})
+    * @Route("/{id}", name="app_peso_index", methods={"GET"})
     */
-   public function index($idUsuario, PesoRepository $pesoRepository): Response
+   public function index($id, PesoRepository $pesoRepository): Response
    {
-      $pesos = $pesoRepository->findByUsuario($idUsuario);
+      $pesos = $pesoRepository->findBy(["idUsuario" => $id]);
 
       if (!$pesos) {
          return RespuestaController::format("404", "Este usuario no tiene pesos registrados");
+      }else{
+         var_dump($pesos);
       }
 
       $pesosJSON = [];

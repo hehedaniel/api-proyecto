@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Ejercicio;
 use App\Repository\EjercicioRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,7 +56,7 @@ class EjercicioController extends AbstractController
     /**
      * @Route("/crear", name="app_ejercicio_crear", methods={"POST"})
      */
-    public function crear(Request $request, EjercicioRepository $ejercicioRepository): Response
+    public function crear(Request $request, EjercicioRepository $ejercicioRepository, UsuarioRepository $usuasrioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -73,9 +74,10 @@ class EjercicioController extends AbstractController
         $ejercicio->setDescripcion($data['descripcion']);
         $ejercicio->setGrupoMuscular($data['grupoMuscular']);
         $ejercicio->setDificultad($data['dificultad']);
-        $ejercicio->setDificultad($data['instrucciones']);
+        $ejercicio->setInstrucciones($data['instrucciones']);
         $ejercicio->setValorMET($data['valorMET']);
-        $ejercicio->setIdUsuario($data['idUsuario']);
+
+        $ejercicio->setIdUsuario($usuasrioRepository->find($data['idUsuario']));
 
         $ejercicioRepository->add($ejercicio, true);
 
@@ -85,9 +87,9 @@ class EjercicioController extends AbstractController
     }
 
     /**
-     * @Route("/edit/{id}", name="app_ejercicio_edit", methods={"PUT"})
+     * @Route("/editar/{id}", name="app_ejercicio_editar", methods={"PUT"})
      */
-    public function editar($id, Request $request, EjercicioRepository $ejercicioRepository): Response
+    public function editar($id, Request $request, EjercicioRepository $ejercicioRepository, UsuarioRepository $usuasrioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -107,18 +109,17 @@ class EjercicioController extends AbstractController
         $ejercicio->setDificultad($data['dificultad']);
         $ejercicio->setInstrucciones($data['instrucciones']);
         $ejercicio->setValorMET($data['valorMET']);
-        $ejercicio->setIdUsuario($data['idUsuario']);
+        $ejercicio->setIdUsuario($usuasrioRepository->find($data['idUsuario']));
 
         $ejercicioRepository->add($ejercicio, true);
 
         $ejercicioJSON = $this->ejercicioJSON($ejercicio);
 
         return RespuestaController::format("200", $ejercicioJSON);
-
     }
 
     /**
-     * @Route("/delete", name="app_ejercicio_delete", methods={"DELETE"})
+     * @Route("/eliminar", name="app_ejercicio_eliminar", methods={"DELETE"})
      */
     public function eliminar(Request $request, EjercicioRepository $ejercicioRepository): Response
     {
@@ -153,7 +154,10 @@ class EjercicioController extends AbstractController
             "nombre" => $ejercicio->getNombre(),
             "descripcion" => $ejercicio->getDescripcion(),
             "grupoMuscular" => $ejercicio->getGrupoMuscular(),
-            // Agregar aquí los demás campos que desees incluir
+            "dificultad" => $ejercicio->getDificultad(),
+            "instrucciones" => $ejercicio->getInstrucciones(),
+            "valorMET" => $ejercicio->getValorMET(),
+            "idUsuario" => $ejercicio->getIdUsuario()->getId()
         ];
 
         return $ejercicioJSON;

@@ -57,9 +57,9 @@ class EnlaceController extends AbstractController
     }
 
     /**
-     * @Route("/new", name="app_enlace_new", methods={"POST"})
+     * @Route("/crear", name="app_enlace_crear", methods={"POST"})
      */
-    public function new(Request $request, EnlaceRepository $enlaceRepository, EjercicioRepository $ejercicioRepository): Response
+    public function crear(Request $request, EnlaceRepository $enlaceRepository, EjercicioRepository $ejercicioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -85,9 +85,9 @@ class EnlaceController extends AbstractController
     }
 
     /**
-     * @Route("/edit/{id}", name="app_enlace_edit", methods={"PUT"})
+     * @Route("/editar/{id}", name="app_enlace_editar", methods={"PUT"})
      */
-    public function edit($id, Request $request, EnlaceRepository $enlaceRepository, EjercicioRepository $ejercicioRepository): Response
+    public function editar($id, Request $request, EnlaceRepository $enlaceRepository, EjercicioRepository $ejercicioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -102,10 +102,8 @@ class EnlaceController extends AbstractController
             return RespuestaController::format("404", "Enlace a editar no encontrado");
         }
 
-        // Parámetros a recibir
         $enlace->setEnlace($data['enlace']);
 
-        // Buscar el ejercicio por ID
         $ejercicio = $ejercicioRepository->find($data['idEjercicio']);
         if (!$ejercicio) {
             return RespuestaController::format("400", "Datos no modificados: Ejercicio no encontrado");
@@ -120,9 +118,9 @@ class EnlaceController extends AbstractController
     }
 
     /**
-     * @Route("/delete", name="app_enlace_delete", methods={"DELETE"})
+     * @Route("/eliminar", name="app_enlace_eliminar", methods={"DELETE"})
      */
-    public function delete(Request $request, EnlaceRepository $enlaceRepository): Response
+    public function eliminar(Request $request, EnlaceRepository $enlaceRepository): Response
     {
 
         // if ($request->getMethod() !== 'DELETE') {
@@ -136,7 +134,6 @@ class EnlaceController extends AbstractController
         }
 
         if (isset($data['id'])) {
-            // Buscar enlace por ID
             $enlace = $enlaceRepository->find($data['id']);
         } else {
             return RespuestaController::format("400", "ID no proporcionado");

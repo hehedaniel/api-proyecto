@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Alimento;
 use App\Form\AlimentoType;
 use App\Repository\AlimentoRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,7 +65,7 @@ class AlimentoController extends AbstractController
     /**
      * @Route("/crear", name="app_alimento_crear", methods={"POST"})
      */
-    public function crear(Request $request, AlimentoRepository $alimentoRepository): Response
+    public function crear(Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -88,7 +89,9 @@ class AlimentoController extends AbstractController
         $alimento->setVitaminas($data["vitaminas"]);
         $alimento->setMinerales($data["minerales"]);
         $alimento->setImagen($data["imagen"]);
-        $alimento->setIdUsuario($data["idUsuario"]);
+        //Cambio de idUsuario a usuario por problema recibido en las pruebas
+        $usuario = $usuarioRepository->find($data["idUsuario"]);
+        $alimento->setIdUsuario($usuario);
 
         $alimentoRepository->add($alimento, true);
 
@@ -101,7 +104,7 @@ class AlimentoController extends AbstractController
      * @Route("/editar/{id}", name="app_alimento_editar", methods={"PUT"})
      */
 
-    public function editar($id, Request $request, AlimentoRepository $alimentoRepository): Response
+    public function editar($id, Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -126,7 +129,9 @@ class AlimentoController extends AbstractController
         $alimento->setVitaminas($data["vitaminas"]);
         $alimento->setMinerales($data["minerales"]);
         $alimento->setImagen($data["imagen"]);
-        $alimento->setIdUsuario($data["idUsuario"]);
+        //Cambio de idUsuario a usuario por problema recibido en las pruebas
+        $usuario = $usuarioRepository->find($data["idUsuario"]);
+        $alimento->setIdUsuario($usuario);
 
         $alimentoRepository->add($alimento, true);
 
