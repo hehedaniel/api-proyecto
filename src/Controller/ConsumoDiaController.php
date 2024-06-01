@@ -44,7 +44,7 @@ class ConsumoDiaController extends AbstractController
         });
 
         if (!$consumosDia) {
-            return RespuestaController::format("404", "No se encontraron entradas correspondientes.");
+            return RespuestaController::format("404", "No se encontraron entradas en las fechas indicadas.");
         }
 
         return $this->json($consumosDia);

@@ -100,11 +100,17 @@ class Usuario
      */
     private $recetas;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Peso::class, mappedBy="idUsuario", orphanRemoval=true)
+     */
+    private $pesos;
+
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
         $this->consumoDias = new ArrayCollection();
         $this->recetas = new ArrayCollection();
+        $this->pesos = new ArrayCollection();
     }
 
     /**
@@ -356,6 +362,36 @@ class Usuario
             // set the owning side to null (unless already changed)
             if ($receta->getIdUsuario() === $this) {
                 $receta->setIdUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Peso>
+     */
+    public function getPesos(): Collection
+    {
+        return $this->pesos;
+    }
+
+    public function addPeso(Peso $peso): self
+    {
+        if (!$this->pesos->contains($peso)) {
+            $this->pesos[] = $peso;
+            $peso->setIdUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removePeso(Peso $peso): self
+    {
+        if ($this->pesos->removeElement($peso)) {
+            // set the owning side to null (unless already changed)
+            if ($peso->getIdUsuario() === $this) {
+                $peso->setIdUsuario(null);
             }
         }
 
