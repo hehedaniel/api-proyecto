@@ -1,4 +1,15 @@
 {
-  "enlace": "test enlace NUECO",
-  "idEjercicio": "3"
+  "nombre": "Macarrones con tomate",
+  "descripcion": "Ensalada clásica con pollo, lechuga, y aderezo César",
+  "instrucciones": "- Cortar la lechuga y el pollo en tiras\r\n- Mezclar la lechuga, el pollo, los croutones y el queso parmesano\r\n- Agregar el aderezo César y mezclar bien\r\n- Servir y disfrutar",
+  "cantidadFinal": 1,
+  "proteinas": 21.6,
+  "grasas": 18.3,
+  "carbohidratos": 11.2,
+  "azucares": 2.1,
+  "vitaminas": 17.4,
+  "minerales": 0,
+  "imagen": "imagen en base 64",
+  "id": 2,
+  "idUsuario": 3
 }

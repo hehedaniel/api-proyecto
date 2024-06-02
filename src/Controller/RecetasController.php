@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Recetas;
 use App\Form\RecetasType;
 use App\Repository\RecetasRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,14 +19,14 @@ use App\Util\RespuestaController;
 class RecetasController extends AbstractController
 {
   /**
-   * @Route("/", name="app_recetas_index", methods={"GET"})
+   * @Route("/usuario/{idUsuario}", name="app_recetas_index", methods={"GET"})
    */
-  public function index(RecetasRepository $recetasRepository): Response
+  public function index($idUsuario, RecetasRepository $recetasRepository): Response
   {
-    $recetas = $recetasRepository->findAll();
+    $recetas = $recetasRepository->findBy(["idUsuario" => $idUsuario]);
 
     if (!$recetas) {
-      return RespuestaController::format("404", "No hay recetas registradas");
+      return RespuestaController::format("404", "No hay recetas registradas por este usuario");
     }
 
     $recetasJSON = [];
@@ -38,18 +39,18 @@ class RecetasController extends AbstractController
   }
 
   /**
-   * @Route("/{id}", name="app_recetas_buscar", methods={"GET"})
+   * @Route("/unica/{id}", name="app_recetas_buscar", methods={"GET"})
    */
   public function buscar($id, RecetasRepository $recetasRepository): Response
   {
     $recetas = $recetasRepository->find($id);
 
     if (!$recetas) {
-      if ($recetasRepository->findOneBy(["nombre" => $id])) {
-        $recetas = $recetasRepository->findOneBy(["nombre" => $id]);
-      } else {
+      // if ($recetasRepository->findOneBy(["nombre" => $id])) {
+      //   $recetas = $recetasRepository->findOneBy(["nombre" => $id]);
+      // } else {
         return RespuestaController::format("404", "No se ha encontrado la receta");
-      }
+      // }
     }
 
     return RespuestaController::format("200", $this->recetasJSON($recetas));
@@ -58,7 +59,7 @@ class RecetasController extends AbstractController
   /**
    * @Route("/crear", name="app_recetas_crear", methods={"POST"})
    */
-  public function crear(Request $request, RecetasRepository $recetasRepository): Response
+  public function crear(Request $request, RecetasRepository $recetasRepository, UsuarioRepository $usuarioRepository): Response
   {
     $data = json_decode($request->getContent(), true);
 
@@ -66,7 +67,7 @@ class RecetasController extends AbstractController
       return RespuestaController::format("400", "No se han recibido datos");
     }
 
-    $recetasExistente = $recetasRepository->findBy(["id_usuario_id" => $data['id_usuario_id']]);
+    $recetasExistente = $recetasRepository->findBy(["idUsuario" => $data['idUsuario']]);
 
     foreach ($recetasExistente as $receta) {
       if ($receta->getNombre() === $data['nombre']) {
@@ -86,7 +87,7 @@ class RecetasController extends AbstractController
     $receta->setVitaminas($data['vitaminas']);
     $receta->setMinerales($data['minerales']);
     $receta->setImagen($data['imagen']);
-    $receta->setIdUsuario($data['id_usuario_id']);
+    $receta->setIdUsuario($usuarioRepository->find($data['idUsuario']));
 
     $recetasRepository->add($receta, true);
 
@@ -94,9 +95,9 @@ class RecetasController extends AbstractController
   }
 
   /**
-   * @Route("/editar/{id}", name="app_recetas_editar", methods={"PUT"})
+   * @Route("/editar", name="app_recetas_editar", methods={"PUT"})
    */
-  public function editar($id, Request $request, RecetasRepository $recetasRepository): Response
+  public function editar(Request $request, RecetasRepository $recetasRepository): Response
   {
     $data = json_decode($request->getContent(), true);
 
@@ -104,7 +105,7 @@ class RecetasController extends AbstractController
       return RespuestaController::format("400", "No se han recibido datos");
     }
 
-    $receta = $recetasRepository->find($id);
+    $receta = $recetasRepository->find($data['id']);
 
     if (!$receta) {
       return RespuestaController::format("404", "No se ha encontrado la receta");
@@ -170,6 +171,6 @@ class RecetasController extends AbstractController
         "id" => $receta->getId(),
       ];
 
-    return RespuestaController::format("200", $recetasJSON);
+    return $recetasJSON;
   }
 }
