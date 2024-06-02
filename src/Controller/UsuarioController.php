@@ -210,6 +210,4 @@ class UsuarioController extends AbstractController
 
       return $usuarioJSON;
    }
-
-
 }
