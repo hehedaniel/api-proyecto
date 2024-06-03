@@ -95,11 +95,16 @@ class UsuarioController extends AbstractController
       $usuario->setCorreo($data['correo']);
       $usuario->setEdad($data['edad']);
       $usuario->setAltura($data['altura']);
-      $usuario->setContrasena($data['contrasena']);
-      $usuario->setObjetivoOpt($data['objetivo_opt']);
-      $usuario->setObjetivoNum($data['objetivo_num']);
+
+      // Estos datos finalmente no los mando en esta peticion
+      // $usuario->setContrasena($data['contrasena']);
+      // $usuario->setObjetivoOpt($data['objetivo_opt']);
+      // $usuario->setObjetivoNum($data['objetivo_num']);
 
       // Parámetros fijos
+      $usuario->setContrasena('null');
+      $usuario->setObjetivoOpt('null');
+      $usuario->setObjetivoNum(-1);
       $usuario->setCorreoV('false');
       $usuario->setRol();
 

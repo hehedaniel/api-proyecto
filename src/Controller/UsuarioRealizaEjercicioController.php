@@ -18,7 +18,7 @@ use App\Util\RespuestaController;
  */
 
 /**
- * @Route("/usuario-realiza-ejercicio")
+ * @Route("/usuariorealizaejercicio")
  */
 class UsuarioRealizaEjercicioController extends AbstractController
 {

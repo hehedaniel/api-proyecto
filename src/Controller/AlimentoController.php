@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Alimento;
-use App\Form\AlimentoType;
 use App\Repository\AlimentoRepository;
 use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,7 +19,7 @@ use App\Util\RespuestaController;
 class AlimentoController extends AbstractController
 {
     /**
-     * @Route("/", name="app_usuario_index", methods={"GET"})
+     * @Route("/index", name="app_usuario_index", methods={"GET"})
      */
 
     public function index(AlimentoRepository $alimentoRepository): Response
@@ -41,7 +40,7 @@ class AlimentoController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="app_alimento_buscar", methods={"GET"})
+     * @Route("/index/{id}", name="app_alimento_buscar", methods={"GET"})
      */
 
     public function buscar($id, AlimentoRepository $alimentoRepository): Response
