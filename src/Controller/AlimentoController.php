@@ -49,7 +49,7 @@ class AlimentoController extends AbstractController
 
         if (!$alimento) {
             //Si no encuentra por ID busca por nombre
-            if ($alimentoRepository->findOneBy(["nombre" => $id])){
+            if ($alimentoRepository->findOneBy(["nombre" => $id])) {
                 $alimento = $alimentoRepository->findOneBy(["nombre" => $id]);
             } else {
                 return RespuestaController::format("404", "No se ha encontrado el alimento");
@@ -60,6 +60,29 @@ class AlimentoController extends AbstractController
 
         return RespuestaController::format("200", $alimentoJSON);
     }
+
+    // /**
+    //  * @Route("/buscarnombre", name="app_alimento_buscarnombre", methods={"POST"})
+    //  */
+    // public function buscarnombre(Request $request, AlimentoRepository $alimentoRepository): Response
+    // {
+    //     $data = json_decode($request->getContent(), true);
+
+    //     if (!$data) {
+    //         return RespuestaController::format("400", "No se han recibido datos");
+    //     }
+
+    //     $alimento = $alimentoRepository->findOneBy(["nombre" => $data["nombre"]]);
+
+    //     if (!$alimento) {
+    //         return RespuestaController::format("404", "No se ha encontrado el alimento");
+    //     }
+
+    //     $alimentoJSON = $this->alimentosJSON($alimento);
+    //     var_dump($alimentoJSON);
+
+    //     return RespuestaController::format("200", $alimentoJSON);
+    // }
 
     /**
      * @Route("/crear", name="app_alimento_crear", methods={"POST"})
@@ -72,7 +95,7 @@ class AlimentoController extends AbstractController
             return RespuestaController::format("400", "No se han recibido datos");
         }
 
-        if($alimentoRepository->findOneBy(["nombre" => $data["nombre"]])){
+        if ($alimentoRepository->findOneBy(["nombre" => $data["nombre"]])) {
             return RespuestaController::format("400", "El alimento ya existe");
         }
 
@@ -161,8 +184,13 @@ class AlimentoController extends AbstractController
         return RespuestaController::format("200", "Alimento eliminado");
     }
 
+    public function buscarAlimento(AlimentoRepository $alimentoRepository, $id){
+        $alimento = $alimentoRepository->find($id);
 
-    private function alimentosJSON(Alimento $alimento)
+        return $this->alimentosJSON($alimento);
+    }
+
+    public function alimentosJSON(Alimento $alimento)
     {
         $alimentosJSON = [
             "id" => $alimento->getId(),

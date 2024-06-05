@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\ConsumoDia;
 use App\Form\ConsumoDiaType;
+use App\Repository\AlimentoRepository;
 use App\Repository\ConsumoDiaRepository;
+use App\Repository\RecetasRepository;
 use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,9 +40,9 @@ class ConsumoDiaController extends AbstractController
     }
 
     /**
-     * @Route("/usuario/rango/{id}", name="consumo_dia_usuario_fechas", methods={"GET"})
+     * @Route("/usuario/rango/{id}", name="consumo_dia_usuario_fechas", methods={"POST"})
      */
-    public function getByUsuarioAndFechas(Request $request, ConsumoDiaRepository $consumoDiaRepository, $id): Response
+    public function getByUsuarioAndFechas(Request $request, ConsumoDiaRepository $consumoDiaRepository, $id, AlimentoRepository $alimentoRepository, RecetasRepository $recetasRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
@@ -53,15 +55,17 @@ class ConsumoDiaController extends AbstractController
             return $consumoDia->isFechaBetween($fechaInicio, $fechaFin);
         });
 
-        foreach ($consumosDia as $consumoDia) {
-            $consumosDiaJSON[] = $this->consumoDiaJSON($consumoDia);
-        }
-
         if (!$consumosDia) {
             return RespuestaController::format("404", "No se encontraron entradas en las fechas indicadas.");
         }
 
+        // foreach ($consumosDia as $consumoDia) {
+        //     $consumosDiaJSON[] = $this->consumoDiaJSON($consumoDia);
+        // }
 
+        foreach ($consumosDia as $consumoDia){
+            $consumosDiaJSON[] = $this->consumoDiaCompletoJSON($consumoDia, $alimentoRepository, $recetasRepository);
+        }
 
         return RespuestaController::format("200", $consumosDiaJSON);
     }
@@ -74,6 +78,7 @@ class ConsumoDiaController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $consumoDia = new ConsumoDia();
+        // Comida acaba siendo el ID de lo que consumira, precedido por 1_ si es alimento o 2_ si es receta (desde angular)
         $consumoDia->setComida($data['comida']);
         $consumoDia->setCantidad($data['cantidad']);
         $consumoDia->setMomento($data['momento']);
@@ -158,5 +163,50 @@ class ConsumoDiaController extends AbstractController
         ];
 
         return $consumoDiaJSON;
+    }
+
+    private function consumoDiaCompletoJSON(ConsumoDia $consumoDia, AlimentoRepository $alimentoRepository, RecetasRepository $recetasRepository){
+
+        $nutrientes = $alimentoRepository->findBy(["nombre"=> $consumoDia->getComida()]);
+
+        // if (!$nutrientes){
+        //     $nutrientes = $recetasRepository->findBy(["nombre"=> $consumoDia->getComida()]);
+        // }
+
+        //Si getComida empieza por 1_ buscar alimento
+        //Si getComida empieza por 2_ buscar receta
+        $comidaParts = explode("_", $consumoDia->getComida());
+        $tipoComida = $comidaParts[0];
+        $idComida = $comidaParts[1];
+
+        if ($tipoComida == "1"){
+            $alimentoController = new AlimentoController();
+            $nutrientes = $alimentoController->buscarAlimento($alimentoRepository, $idComida);
+            // $nutrientes = $alimentoRepository->find($idComida);
+        } else if ($tipoComida == "2"){
+            $recetaController = new RecetasController();
+            $nutrientes = $recetaController->buscarAlimento($recetasRepository, $idComida);
+            // $nutrientes = $recetasRepository->findOneBy(["id"=> $idComida]);
+        }
+
+        if (!$nutrientes){
+            return RespuestaController::format("404", "No se encontraron nutrientes para la comida");
+        }
+
+        // var_dump($nutrientes);
+
+        $consumoDiaJSON = [
+            "id" => $consumoDia->getId(),
+            "comida" => $consumoDia->getComida(),
+            "cantidad" => $consumoDia->getCantidad(),
+            "momento" => $consumoDia->getMomento(),
+            "fecha" => $consumoDia->getFecha(),
+            "hora" => $consumoDia->getHora(),
+            "idUsuario" => $consumoDia->getIdUsuario(),
+            "nutrientes" => $nutrientes
+        ];
+
+        return $consumoDiaJSON;
+        // return $nutrientes;
     }
 }

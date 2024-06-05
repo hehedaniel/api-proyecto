@@ -173,4 +173,10 @@ class RecetasController extends AbstractController
 
     return $recetasJSON;
   }
+
+  public function buscarAlimento(RecetasRepository $recetasRepository, $id){
+    $receta = $recetasRepository->find($id);
+
+    return $this->recetasJSON($receta);
+}
 }
