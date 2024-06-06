@@ -19,7 +19,7 @@ use App\Util\CbbddConsultas;
 class AlimentoController extends AbstractController
 {
     /**
-     * @Route("/index", name="app_usuario_index", methods={"GET"})
+     * @Route("/index", name="app_alimento_index", methods={"GET"})
      */
 
     public function index(AlimentoRepository $alimentoRepository): Response
@@ -58,23 +58,6 @@ class AlimentoController extends AbstractController
         $alimentoJSON = $this->alimentosJSON($alimento);
 
         return RespuestaController::format("200", $alimentoJSON);
-    }
-
-    /**
-     * @Route("/buscarnombre", name="app_alimento_buscarnombre", methods={"POST"})
-     */
-    public function buscarnombre(Request $request, AlimentoRepository $alimentoRepository)
-    {
-        $nombreBuscar = json_decode($request->getContent(), true)["nombre"];
-
-        $cbbdd = new CbbddConsultas();
-        $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM alimento WHERE nombre LIKE '%$nombreBuscar%'");
-        if (!$alimentosEncontrados) {
-            // Aquí el codigo de error deberia ser diferente
-            return RespuestaController::format("200", "No se ha encontrado el alimento");
-        } else {
-            return RespuestaController::format("200", $alimentosEncontrados);
-        }
     }
 
     /**
@@ -176,6 +159,29 @@ class AlimentoController extends AbstractController
         return RespuestaController::format("200", "Alimento eliminado");
     }
 
+    /**
+     * @Route("/nombre", name="app_alimento_nombre", methods={"POST"})
+     */
+    public function nombre(Request $request, AlimentoRepository $alimentoRepository)
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data["nombre"])) {
+            return RespuestaController::format("400", "No se ha recibido el nombre del alimento");
+        }
+
+        $nombreBuscar = $data["nombre"];
+
+        $cbbdd = new CbbddConsultas();
+        $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM alimento WHERE nombre LIKE '%$nombreBuscar%'");
+        if (!$alimentosEncontrados) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        }
+
+        return RespuestaController::format("200", $alimentosEncontrados);
+    }
+
     public function buscarAlimento(AlimentoRepository $alimentoRepository, $id)
     {
         $alimento = $alimentoRepository->find($id);
@@ -205,36 +211,4 @@ class AlimentoController extends AbstractController
 
         return $alimentosJSON;
     }
-
-    public function buscarNombreSinPeticion($nombre)
-    {
-
-        $cbbdd = new CbbddConsultas();
-        $recetaEncontrada = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
-        if (!$recetaEncontrada) {
-            // Aquí el codigo de error deberia ser diferente
-            return RespuestaController::format("200", "No se ha encontrado el alimento");
-        } else {
-            return RespuestaController::format("200", $recetaEncontrada);
-        }
-    }
-
-
-    public function ejecutarSentenciaSQL($sql)
-    {
-        // Aquí puedes agregar la lógica para ejecutar la sentencia SQL
-        // Puedes utilizar la conexión a la base de datos o un ORM como Doctrine
-
-        // Ejemplo de ejecución de sentencia SQL utilizando Doctrine:
-        $entityManager = $this->getDoctrine()->getManager();
-        $connection = $entityManager->getConnection();
-        $statement = $connection->prepare($sql);
-        $statement->execute();
-
-        // Puedes retornar el resultado de la sentencia SQL si es necesario
-        // return $statement->fetchAll();
-
-        // O realizar cualquier otra acción necesaria con el resultado de la sentencia SQL
-    }
-
 }
