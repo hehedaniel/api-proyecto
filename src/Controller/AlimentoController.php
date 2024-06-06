@@ -211,4 +211,16 @@ class AlimentoController extends AbstractController
 
         return $alimentosJSON;
     }
+
+    public static function buscarNombreSinPeticion($nombre)
+    {
+        $cbbdd = new CbbddConsultas();
+        $alimentoencontrado = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
+        if (!$alimentoencontrado) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        } else {
+            return RespuestaController::format("200", $alimentoencontrado);
+        }
+    }
 }

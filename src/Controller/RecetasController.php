@@ -170,9 +170,8 @@ class RecetasController extends AbstractController
     }
   }
 
-  public function buscarNombreSinPeticion($nombre)
+  public static function buscarNombreSinPeticion($nombre)
   {
-
     $cbbdd = new CbbddConsultas();
     $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
     if (!$alimentosEncontrados) {

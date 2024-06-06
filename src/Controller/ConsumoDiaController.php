@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\ConsumoDia;
 use App\Form\ConsumoDiaType;
 use App\Repository\AlimentoRepository;
+use App\Entity\Alimento;
 use App\Repository\ConsumoDiaRepository;
 use App\Repository\RecetasRepository;
 use App\Repository\UsuarioRepository;
@@ -12,8 +13,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
 use App\Util\RespuestaController;
+use App\Util\CbbddConsultas;
 
 /**
  * @Route("/consumodia")
@@ -78,16 +79,42 @@ class ConsumoDiaController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $consumoDia = new ConsumoDia();
+        $alimento = new Alimento();
+
         // Comida acaba siendo el ID de lo que consumira, precedido por 1_ si es alimento o 2_ si es receta
-        if ($alimentoRepository->buscarNombreSinPeticion($data['comida'])) {
-            $consumoDia->setComida("1_" . $alimentoRepository->buscarNombreSinPeticion($data['comida'])->getId());
-        } else if ($recetasRepository->buscarNombreSinPeticion($data['comida'])) {
-            $consumoDia->setComida("2_" . $recetasRepository->buscarNombreSinPeticion($data['comida']->getId()));
-        }else {
-            return RespuestaController::format("404", "No se encontró la comida.");
+        // if (AlimentoController::buscarNombreSinPeticion($data['comida'])) {
+        //     $consumoDia->setComida("1_" . AlimentoController::buscarNombreSinPeticion($data['comida'])->getId());
+        // } else if (RecetasController::buscarNombreSinPeticion($data['comida'])) {
+        //     $consumoDia->setComida("2_" . AlimentoController::buscarNombreSinPeticion($data['comida'])->getId());
+        // }else {
+        //     return RespuestaController::format("404", "No se encontró la comida.");
+        // }
+        $nombre = $data['comida'];
+
+        $cbbdd = new CbbddConsultas();
+        $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
+        if (!$alimentosEncontrados) {
+            $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM alimento WHERE nombre LIKE '%$nombre%'");
+            if (!$alimentosEncontrados) {
+                return RespuestaController::format("404", "No se encontró la comida.");
+            } else {
+                $consumoDia->setComida("1_" . $alimentosEncontrados[0]["id"]);
+            }
+        } else {
+            $consumoDia->setComida("2_" . $alimentosEncontrados[0]["id"]);
         }
+
+        // if ($alimentoRepository->findOneBy(["nombre" => $data['comida']])) {
+        //     $consumoDia->setComida("1_" . $alimentoRepository->findOneBy(["nombre" => $data['comida']])->getId());
+        // } else if ($recetasRepository->findOneBy(["nombre" => $data['comida']])) {
+        //     $consumoDia->setComida("2_" . $recetasRepository->findOneBy(["nombre" => $data['comida']])->getId());
+        // } else {
+        //     return RespuestaController::format("404", "No se encontró la comida.");
+        // }
         // $consumoDia->setComida($data['comida']);
-        $consumoDia->setCantidad($data['cantidad']);
+        $cantidadFloat = floatval($data['cantidad']);
+        var_dump($cantidadFloat);
+        $consumoDia->setCantidad($cantidadFloat);
         $consumoDia->setMomento($data['momento']);
         $consumoDia->setFecha(new \DateTime($data['fecha']));
         $consumoDia->setHora(new \DateTime($data['hora']));
