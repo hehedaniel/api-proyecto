@@ -65,7 +65,7 @@ class Recetas
     /**
      * @ORM\Column(type="float")
      */
-    private $minerales;
+    private $calorias;
 
     /**
      * @ORM\Column(type="text")
@@ -191,14 +191,14 @@ class Recetas
         return $this;
     }
 
-    public function getMinerales(): ?float
+    public function getCalorias(): ?float
     {
-        return $this->minerales;
+        return $this->calorias;
     }
 
-    public function setMinerales(float $minerales): self
+    public function setCalorias(float $calorias): self
     {
-        $this->minerales = $minerales;
+        $this->calorias = $calorias;
 
         return $this;
     }

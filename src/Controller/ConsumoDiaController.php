@@ -63,7 +63,7 @@ class ConsumoDiaController extends AbstractController
         //     $consumosDiaJSON[] = $this->consumoDiaJSON($consumoDia);
         // }
 
-        foreach ($consumosDia as $consumoDia){
+        foreach ($consumosDia as $consumoDia) {
             $consumosDiaJSON[] = $this->consumoDiaCompletoJSON($consumoDia, $alimentoRepository, $recetasRepository);
         }
 
@@ -73,13 +73,20 @@ class ConsumoDiaController extends AbstractController
     /**
      * @Route("/crear/usuario/{id}", name="consumo_dia_usuario", methods={"POST"})
      */
-    public function crear(Request $request, ConsumoDiaRepository $consumoDiaRepository, $id, UsuarioRepository $usuarioRepository): Response
+    public function crear(Request $request, ConsumoDiaRepository $consumoDiaRepository, $id, UsuarioRepository $usuarioRepository, AlimentoRepository $alimentoRepository, RecetasRepository $recetasRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
         $consumoDia = new ConsumoDia();
-        // Comida acaba siendo el ID de lo que consumira, precedido por 1_ si es alimento o 2_ si es receta (desde angular)
-        $consumoDia->setComida($data['comida']);
+        // Comida acaba siendo el ID de lo que consumira, precedido por 1_ si es alimento o 2_ si es receta
+        if ($alimentoRepository->buscarNombreSinPeticion($data['comida'])) {
+            $consumoDia->setComida("1_" . $alimentoRepository->buscarNombreSinPeticion($data['comida'])->getId());
+        } else if ($recetasRepository->buscarNombreSinPeticion($data['comida'])) {
+            $consumoDia->setComida("2_" . $recetasRepository->buscarNombreSinPeticion($data['comida']->getId()));
+        }else {
+            return RespuestaController::format("404", "No se encontró la comida.");
+        }
+        // $consumoDia->setComida($data['comida']);
         $consumoDia->setCantidad($data['cantidad']);
         $consumoDia->setMomento($data['momento']);
         $consumoDia->setFecha(new \DateTime($data['fecha']));
@@ -165,9 +172,10 @@ class ConsumoDiaController extends AbstractController
         return $consumoDiaJSON;
     }
 
-    private function consumoDiaCompletoJSON(ConsumoDia $consumoDia, AlimentoRepository $alimentoRepository, RecetasRepository $recetasRepository){
+    private function consumoDiaCompletoJSON(ConsumoDia $consumoDia, AlimentoRepository $alimentoRepository, RecetasRepository $recetasRepository)
+    {
 
-        $nutrientes = $alimentoRepository->findBy(["nombre"=> $consumoDia->getComida()]);
+        $nutrientes = $alimentoRepository->findBy(["nombre" => $consumoDia->getComida()]);
 
         // if (!$nutrientes){
         //     $nutrientes = $recetasRepository->findBy(["nombre"=> $consumoDia->getComida()]);
@@ -179,17 +187,17 @@ class ConsumoDiaController extends AbstractController
         $tipoComida = $comidaParts[0];
         $idComida = $comidaParts[1];
 
-        if ($tipoComida == "1"){
+        if ($tipoComida == "1") {
             $alimentoController = new AlimentoController();
             $nutrientes = $alimentoController->buscarAlimento($alimentoRepository, $idComida);
             // $nutrientes = $alimentoRepository->find($idComida);
-        } else if ($tipoComida == "2"){
+        } else if ($tipoComida == "2") {
             $recetaController = new RecetasController();
             $nutrientes = $recetaController->buscarAlimento($recetasRepository, $idComida);
             // $nutrientes = $recetasRepository->findOneBy(["id"=> $idComida]);
         }
 
-        if (!$nutrientes){
+        if (!$nutrientes) {
             return RespuestaController::format("404", "No se encontraron nutrientes para la comida");
         }
 

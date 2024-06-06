@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Util\RespuestaController;
+use App\Util\CbbddConsultas;
 
 /**
  * @Route("/recetas")
@@ -49,7 +50,7 @@ class RecetasController extends AbstractController
       // if ($recetasRepository->findOneBy(["nombre" => $id])) {
       //   $recetas = $recetasRepository->findOneBy(["nombre" => $id]);
       // } else {
-        return RespuestaController::format("404", "No se ha encontrado la receta");
+      return RespuestaController::format("404", "No se ha encontrado la receta");
       // }
     }
 
@@ -85,7 +86,7 @@ class RecetasController extends AbstractController
     $receta->setCarbohidratos($data['carbohidratos']);
     $receta->setAzucares($data['azucares']);
     $receta->setVitaminas($data['vitaminas']);
-    $receta->setMinerales($data['minerales']);
+    $receta->setCalorias($data['calorias']);
     $receta->setImagen($data['imagen']);
     $receta->setIdUsuario($usuarioRepository->find($data['idUsuario']));
 
@@ -122,7 +123,7 @@ class RecetasController extends AbstractController
     $receta->setCarbohidratos($data['carbohidratos']);
     $receta->setAzucares($data['azucares']);
     $receta->setVitaminas($data['vitaminas']);
-    $receta->setMinerales($data['minerales']);
+    $receta->setCalorias($data['calorias']);
     $receta->setImagen($data['imagen']);
 
     $recetasRepository->add($receta, true);
@@ -152,31 +153,63 @@ class RecetasController extends AbstractController
     return RespuestaController::format("200", "Receta eliminada");
   }
 
+  /**
+   * @Route("/buscarnombre", name="app_alimento_buscarnombre", methods={"POST"})
+   */
+  public function buscarnombre(Request $request)
+  {
+    $nombreBuscar = json_decode($request->getContent(), true)["nombre"];
 
-  private function recetasJSON(Recetas $receta){
+    $cbbdd = new CbbddConsultas();
+    $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombreBuscar%'");
+    if (!$alimentosEncontrados) {
+      // Aquí el codigo de error deberia ser diferente
+      return RespuestaController::format("200", "No se ha encontrado el alimento");
+    } else {
+      return RespuestaController::format("200", $alimentosEncontrados);
+    }
+  }
+
+  public function buscarNombreSinPeticion($nombre)
+  {
+
+    $cbbdd = new CbbddConsultas();
+    $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
+    if (!$alimentosEncontrados) {
+      // Aquí el codigo de error deberia ser diferente
+      return RespuestaController::format("200", "No se ha encontrado el alimento");
+    } else {
+      return RespuestaController::format("200", $alimentosEncontrados);
+    }
+  }
+
+
+  private function recetasJSON(Recetas $receta)
+  {
     $recetasJSON = [];
 
-      $recetasJSON = [
-        "nombre" => $receta->getNombre(),
-        "descripcion" => $receta->getDescripcion(),
-        "instrucciones" => $receta->getInstrucciones(),
-        "cantidadFinal" => $receta->getCantidadFinal(),
-        "proteinas" => $receta->getProteinas(),
-        "grasas" => $receta->getGrasas(),
-        "carbohidratos" => $receta->getCarbohidratos(),
-        "azucares" => $receta->getAzucares(),
-        "vitaminas" => $receta->getVitaminas(),
-        "minerales" => $receta->getMinerales(),
-        "imagen"=> $receta->getImagen(),
-        "id" => $receta->getId(),
-      ];
+    $recetasJSON = [
+      "nombre" => $receta->getNombre(),
+      "descripcion" => $receta->getDescripcion(),
+      "instrucciones" => $receta->getInstrucciones(),
+      "cantidadFinal" => $receta->getCantidadFinal(),
+      "proteinas" => $receta->getProteinas(),
+      "grasas" => $receta->getGrasas(),
+      "carbohidratos" => $receta->getCarbohidratos(),
+      "azucares" => $receta->getAzucares(),
+      "vitaminas" => $receta->getVitaminas(),
+      "calorias" => $receta->getCalorias(),
+      "imagen" => $receta->getImagen(),
+      "id" => $receta->getId(),
+    ];
 
     return $recetasJSON;
   }
 
-  public function buscarAlimento(RecetasRepository $recetasRepository, $id){
+  public function buscarAlimento(RecetasRepository $recetasRepository, $id)
+  {
     $receta = $recetasRepository->find($id);
 
     return $this->recetasJSON($receta);
-}
+  }
 }

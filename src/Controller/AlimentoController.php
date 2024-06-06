@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Util\RespuestaController;
-
+use App\Util\CbbddConsultas;
 
 /**
  * @Route("/alimento")
@@ -42,7 +42,6 @@ class AlimentoController extends AbstractController
     /**
      * @Route("/index/{id}", name="app_alimento_buscar", methods={"GET"})
      */
-
     public function buscar($id, AlimentoRepository $alimentoRepository): Response
     {
         $alimento = $alimentoRepository->find($id);
@@ -61,28 +60,22 @@ class AlimentoController extends AbstractController
         return RespuestaController::format("200", $alimentoJSON);
     }
 
-    // /**
-    //  * @Route("/buscarnombre", name="app_alimento_buscarnombre", methods={"POST"})
-    //  */
-    // public function buscarnombre(Request $request, AlimentoRepository $alimentoRepository): Response
-    // {
-    //     $data = json_decode($request->getContent(), true);
+    /**
+     * @Route("/buscarnombre", name="app_alimento_buscarnombre", methods={"POST"})
+     */
+    public function buscarnombre(Request $request, AlimentoRepository $alimentoRepository)
+    {
+        $nombreBuscar = json_decode($request->getContent(), true)["nombre"];
 
-    //     if (!$data) {
-    //         return RespuestaController::format("400", "No se han recibido datos");
-    //     }
-
-    //     $alimento = $alimentoRepository->findOneBy(["nombre" => $data["nombre"]]);
-
-    //     if (!$alimento) {
-    //         return RespuestaController::format("404", "No se ha encontrado el alimento");
-    //     }
-
-    //     $alimentoJSON = $this->alimentosJSON($alimento);
-    //     var_dump($alimentoJSON);
-
-    //     return RespuestaController::format("200", $alimentoJSON);
-    // }
+        $cbbdd = new CbbddConsultas();
+        $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM alimento WHERE nombre LIKE '%$nombreBuscar%'");
+        if (!$alimentosEncontrados) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        } else {
+            return RespuestaController::format("200", $alimentosEncontrados);
+        }
+    }
 
     /**
      * @Route("/crear", name="app_alimento_crear", methods={"POST"})
@@ -109,7 +102,7 @@ class AlimentoController extends AbstractController
         $alimento->setCarbohidratos($data["carbohidratos"]);
         $alimento->setAzucares($data["azucares"]);
         $alimento->setVitaminas($data["vitaminas"]);
-        $alimento->setMinerales($data["minerales"]);
+        $alimento->setCalorias($data["Calorias"]);
         $alimento->setImagen($data["imagen"]);
         //Cambio de idUsuario a usuario por problema recibido en las pruebas
         $usuario = $usuarioRepository->find($data["idUsuario"]);
@@ -125,7 +118,6 @@ class AlimentoController extends AbstractController
     /**
      * @Route("/editar/{id}", name="app_alimento_editar", methods={"PUT"})
      */
-
     public function editar($id, Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository): Response
     {
         $data = json_decode($request->getContent(), true);
@@ -149,7 +141,7 @@ class AlimentoController extends AbstractController
         $alimento->setCarbohidratos($data["carbohidratos"]);
         $alimento->setAzucares($data["azucares"]);
         $alimento->setVitaminas($data["vitaminas"]);
-        $alimento->setMinerales($data["minerales"]);
+        $alimento->setCalorias($data["calorias"]);
         $alimento->setImagen($data["imagen"]);
         //Cambio de idUsuario a usuario por problema recibido en las pruebas
         $usuario = $usuarioRepository->find($data["idUsuario"]);
@@ -184,7 +176,8 @@ class AlimentoController extends AbstractController
         return RespuestaController::format("200", "Alimento eliminado");
     }
 
-    public function buscarAlimento(AlimentoRepository $alimentoRepository, $id){
+    public function buscarAlimento(AlimentoRepository $alimentoRepository, $id)
+    {
         $alimento = $alimentoRepository->find($id);
 
         return $this->alimentosJSON($alimento);
@@ -192,6 +185,7 @@ class AlimentoController extends AbstractController
 
     public function alimentosJSON(Alimento $alimento)
     {
+
         $alimentosJSON = [
             "id" => $alimento->getId(),
             "nombre" => $alimento->getNombre(),
@@ -203,13 +197,44 @@ class AlimentoController extends AbstractController
             "carbohidratos" => $alimento->getCarbohidratos(),
             "azucares" => $alimento->getAzucares(),
             "vitaminas" => $alimento->getVitaminas(),
-            "minerales" => $alimento->getMinerales(),
+            "calorias" => $alimento->getCalorias(),
             "imagen" => $alimento->getImagen(),
             "idUsuario" => $alimento->getIdUsuario(),
         ];
 
+
         return $alimentosJSON;
     }
 
+    public function buscarNombreSinPeticion($nombre)
+    {
+
+        $cbbdd = new CbbddConsultas();
+        $recetaEncontrada = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
+        if (!$recetaEncontrada) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        } else {
+            return RespuestaController::format("200", $recetaEncontrada);
+        }
+    }
+
+
+    public function ejecutarSentenciaSQL($sql)
+    {
+        // Aquí puedes agregar la lógica para ejecutar la sentencia SQL
+        // Puedes utilizar la conexión a la base de datos o un ORM como Doctrine
+
+        // Ejemplo de ejecución de sentencia SQL utilizando Doctrine:
+        $entityManager = $this->getDoctrine()->getManager();
+        $connection = $entityManager->getConnection();
+        $statement = $connection->prepare($sql);
+        $statement->execute();
+
+        // Puedes retornar el resultado de la sentencia SQL si es necesario
+        // return $statement->fetchAll();
+
+        // O realizar cualquier otra acción necesaria con el resultado de la sentencia SQL
+    }
 
 }
