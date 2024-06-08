@@ -59,7 +59,6 @@ class UsuarioController extends AbstractController
    {
       $data = json_decode($request->getContent(), true);
 
-      var_dump($data);
 
       if ($data) {
          // Si recibo datos busco por ID
@@ -75,7 +74,6 @@ class UsuarioController extends AbstractController
          return RespuestaController::format("400", "No se han recibido datos");
       }
 
-      var_dump($usuario);
 
       $usuarioJSON = $this->usuarioJSON($usuario);
 
@@ -143,18 +141,11 @@ class UsuarioController extends AbstractController
          return RespuestaController::format("404", "Usuario a editar no encontrado");
       }
 
-      // Comprobar que el correo del usuario a editar coincide con el correo proporcionado en los datos
-      if ($usuario->getCorreo() !== $data['correo']) {
-         return RespuestaController::format("400", "El correo no se puede cambiar");
-      }
 
       // Parámetros a recibir
       $usuario->setNombre($data['nombre']);
       $usuario->setApellidos($data['apellidos']);
-      $usuario->setCorreo($data['correo']);
-      $usuario->setEdad($data['edad']);
       $usuario->setAltura($data['altura']);
-      $usuario->setContrasena($data['contrasena']);
       $usuario->setObjetivoOpt($data['objetivo_opt']);
       $usuario->setObjetivoNum($data['objetivo_num']);
 
