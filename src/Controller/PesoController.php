@@ -127,34 +127,36 @@ class PesoController extends AbstractController
    }
 
    /**
-    * @Route("/eliminar", name="app_peso_eliminar", methods={"DELETE"})
+    * @Route("/eliminar/{idPeso}", name="app_peso_eliminar", methods={"DELETE"})
     */
-   public function eliminar(Request $request, PesoRepository $pesoRepository): Response
+   public function eliminar($idPeso, PesoRepository $pesoRepository): Response
    {
-      $data = json_decode($request->getContent(), true);
+      // $data = json_decode($request->getContent(), true);
 
-      if (!$data) {
-         return RespuestaController::format("400", "No se han recibido datos");
+      // if (!$data) {
+      //    return RespuestaController::format("400", "No se han recibido datos");
+      // }
+
+      // //Encontrar peso por usuario_id, fecha y hora
+      // $pesoEditar = $pesoRepository->findOneBy([
+      //    'idUsuario' => $data['idUsuario'],
+      //    'fecha' => new \DateTime($data['fecha']),
+      //    'hora' => new \DateTime($data['hora'])
+      // ]);
+
+      if (!$idPeso) {
+         return RespuestaController::format("404", "No se recibio el identificado");
       }
 
-      //Encontrar peso por usuario_id, fecha y hora
-      $pesoEditar = $pesoRepository->findOneBy([
-         'idUsuario' => $data['idUsuario'],
-         'fecha' => new \DateTime($data['fecha']),
-         'hora' => new \DateTime($data['hora'])
-      ]);
+      $pesoEliminar = $pesoRepository->find($idPeso);
 
-      if (!$pesoEditar) {
-         return RespuestaController::format("404", "No se encontró registro a eliminar");
-      }
-
-      $pesoRepository->remove($pesoEditar, true);
+      $pesoRepository->remove($pesoEliminar, true);
 
       return RespuestaController::format("200", "Registro eliminado correctamente");
    }
 
    /**
-    * @Route("/rangofechas", name="app_peso_rango", methods={"GET"})
+    * @Route("/rangofechas", name="app_peso_rango", methods={"POST"})
     */
    public function getByUsuarioAndFechas(PesoRepository $pesoRepository, Request $request): Response
    {
@@ -170,7 +172,7 @@ class PesoController extends AbstractController
       });
 
       if (!$pesosUsuario) {
-         return RespuestaController::format("404", "No se encontraron pesos en las fechas indicadas.");
+         return RespuestaController::format("200", "No se encontraron pesos en las fechas indicadas.");
       }
 
       $pesosUsuarioJSON = [];
@@ -181,6 +183,27 @@ class PesoController extends AbstractController
 
       return RespuestaController::format("200", $pesosUsuarioJSON);
    }
+
+   /**
+    * @Route("/encontrar", name="app_peso_encontrar", methods={"POST"})
+    */
+   public function encontrar(PesoRepository $pesoRepository, Request $request): Response
+   {
+      $data = json_decode($request->getContent(), true);
+
+      $peso = $pesoRepository->findOneBy([
+         'idUsuario' => $data['idUsuario'],
+         'fecha' => new \DateTime($data['fecha']),
+         'hora' => new \DateTime($data['hora'])
+      ]);
+
+      if (!$peso) {
+         return RespuestaController::format("404", "No se encontró el peso");
+      }
+
+      return RespuestaController::format("200", $this->pesoJSON($peso));
+   }
+
    private function pesoJSON(Peso $peso)
    {
       $pesoJSON = [];

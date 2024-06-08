@@ -63,32 +63,38 @@ class AlimentoController extends AbstractController
     /**
      * @Route("/crear", name="app_alimento_crear", methods={"POST"})
      */
-    public function crear(Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository): Response
+    public function crear(Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository)
     {
         $data = json_decode($request->getContent(), true);
+
+        // if ($data){
+        //     return RespuestaController::format("400", $data);
+        // }
+
+        // return $data;
 
         if (!$data) {
             return RespuestaController::format("400", "No se han recibido datos");
         }
 
-        if ($alimentoRepository->findOneBy(["nombre" => $data["nombre"]])) {
-            return RespuestaController::format("400", "El alimento ya existe");
+        if ($alimentoRepository->findOneBy(["nombre" => $data["alimento"]["nombre"]])) {
+            return RespuestaController::format("200", "El alimento ya existe");
         }
 
         $alimento = new Alimento();
-        $alimento->setNombre($data["nombre"]);
-        $alimento->setDescripcion($data["descripcion"]);
-        $alimento->setMarca($data["marca"]);
-        $alimento->setCantidad($data["cantidad"]);
-        $alimento->setProteinas($data["proteinas"]);
-        $alimento->setGrasas($data["grasas"]);
-        $alimento->setCarbohidratos($data["carbohidratos"]);
-        $alimento->setAzucares($data["azucares"]);
-        $alimento->setVitaminas($data["vitaminas"]);
-        $alimento->setCalorias($data["Calorias"]);
-        $alimento->setImagen($data["imagen"]);
+        $alimento->setNombre($data["alimento"]["nombre"]);
+        $alimento->setDescripcion($data["alimento"]["descripcion"]);
+        $alimento->setMarca($data["alimento"]["marca"]);
+        $alimento->setCantidad($data["alimento"]["cantidad"]);
+        $alimento->setProteinas($data["alimento"]["proteinas"]);
+        $alimento->setGrasas($data["alimento"]["grasas"]);
+        $alimento->setCarbohidratos($data["alimento"]["carbohidratos"]);
+        $alimento->setAzucares($data["alimento"]["azucares"]);
+        $alimento->setVitaminas($data["alimento"]["vitaminas"]);
+        $alimento->setCalorias($data["alimento"]["calorias"]);
+        $alimento->setImagen($data["alimento"]["imagen"]);
         //Cambio de idUsuario a usuario por problema recibido en las pruebas
-        $usuario = $usuarioRepository->find($data["idUsuario"]);
+        $usuario = $usuarioRepository->find($data["alimento"]["idUsuario"]);
         $alimento->setIdUsuario($usuario);
 
         $alimentoRepository->add($alimento, true);
@@ -187,6 +193,24 @@ class AlimentoController extends AbstractController
         $alimento = $alimentoRepository->find($id);
 
         return $this->alimentosJSON($alimento);
+    }
+
+    public static function buscarNombreSinPeticionID($nombre)
+    {
+        $cbbdd = new CbbddConsultas();
+        $alimentosEncontrados = $cbbdd->consulta("SELECT ID FROM alimento WHERE nombre LIKE '%$nombre%'");
+        if (!$alimentosEncontrados) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        } else {
+            // Para limpiar el string y quedarme solo con el ID
+            $pos = strpos($alimentosEncontrados, '{');
+            $json = substr($alimentosEncontrados, $pos);
+            $dataJSON = json_decode($json, true);
+            $id = $dataJSON['respuesta'][0]['ID'];
+
+            return RespuestaController::format("200", $id);
+        }
     }
 
     public function alimentosJSON(Alimento $alimento)

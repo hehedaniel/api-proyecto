@@ -432,3 +432,20 @@
     ],
     "ref": "hoVRWmuGuhoZ_TkqdF8IkxtfSDRIE5Q-MdpsHe7e3kWJByraNSdJJaFPh42UgW8kBc7q27nmeOAULdX7mnPviw"
 }
+
+{
+    {
+        "azucares": 2
+      "calorias": 2
+      "cantidad" : 5
+      "carbohidratos": 2
+      "descripcion": "mi desodorante"
+      "grasas": 2
+      "imagen": "imagen en base 64"
+      "marca": "axe"
+      "nombre": "desodorante"
+      "proteinas": 3
+      "usuario_id": "2"
+      "vitaminas": 2
+    }
+}

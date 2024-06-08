@@ -53,19 +53,24 @@ class UsuarioController extends AbstractController
    }
 
    /**
-    * @Route("/{id}", name="app_usuario_buscar", methods={"GET"})
+    * @Route("/buscar", name="app_usuario_buscar", methods={"POST"})
     */
-   public function buscar($id, UsuarioRepository $usuarioRepository): Response
+   public function buscar(Request $request, UsuarioRepository $usuarioRepository): Response
    {
-      $usuario = $usuarioRepository->find($id);
+      $data = json_decode($request->getContent(), true);
 
-      if (!$usuario) {
-         // Si no encuentro por ID busco por nombre
-         if ($usuarioRepository->findOneBy(['nombre' => $id])) {
-            $usuario = $usuarioRepository->findOneBy(['nombre' => $id]);
+      if ($data) {
+         // Si recibo datos busco por ID
+         if (isset($data['id'])) {
+            $usuario = $usuarioRepository->find($data['id']);
+         } elseif (isset($data['email'])) {
+            // Si recibo correo busco por correo
+            $usuario = $usuarioRepository->findOneBy(['correo' => $data['email']]);
          } else {
-            return RespuestaController::format("404", "Usuario no encontrado");
+            return RespuestaController::format("400", "ID o correo no recibidos");
          }
+      }else {
+         return RespuestaController::format("400", "No se han recibido datos");
       }
 
       $usuarioJSON = $this->usuarioJSON($usuario);

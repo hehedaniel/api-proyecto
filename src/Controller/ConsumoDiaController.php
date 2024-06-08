@@ -57,7 +57,7 @@ class ConsumoDiaController extends AbstractController
         });
 
         if (!$consumosDia) {
-            return RespuestaController::format("404", "No se encontraron entradas en las fechas indicadas.");
+            return RespuestaController::format("200", "No se encontraron entradas en las fechas indicadas.");
         }
 
         // foreach ($consumosDia as $consumoDia) {
@@ -160,14 +160,38 @@ class ConsumoDiaController extends AbstractController
     }
 
     /**
-     * @Route("/eliminar", name="eliminar_consumo_dia_usuario", methods={"DELETE"})
+     * @Route("/eliminar", name="eliminar_consumo_dia_usuario", methods={"DELETE", "POST"})
      */
-    public function eliminar(Request $request, ConsumoDiaRepository $consumoDiaRepository): Response
+    public function eliminar(Request $request, ConsumoDiaRepository $consumoDiaRepository)
     {
         $data = json_decode($request->getContent(), true);
 
+        $comidaBuscar = '';
+
+        // Busco el alimento o receta que recibo por el nombre
+        if (AlimentoController::buscarNombreSinPeticionID($data['comida'])) {
+            $respuesta[] = AlimentoController::buscarNombreSinPeticionID($data['comida']);
+            $comidaBuscar = "1_" . $respuesta['repuesta'];
+        } else if (RecetasController::buscarNombreSinPeticionID($data['comida'])) {
+            $comidaBuscar = "2_" . RecetasController::buscarNombreSinPeticionID($data['comida']);
+        } else {
+            return RespuestaController::format("404", "No se encontró la comida.");
+        }
+
+
+
+        // var_dump($id);
+        // return RespuestaController::format("200", $comidaBuscar);
+
+        // echo($id);echo "<br>";
+        // echo($data['fecha']);echo "<br>";
+        // echo($data['hora']);echo "<br>";
+        // echo($data['idUsuario']);echo "<br>";
+        echo $comidaBuscar;
+
+
         $consumoDia = $consumoDiaRepository->findOneBy([
-            'comida' => $data['comida'],
+            'comida' => $comidaBuscar,
             'fecha' => new \DateTime($data['fecha']),
             'hora' => new \DateTime($data['hora']),
             'idUsuario' => $data['idUsuario']

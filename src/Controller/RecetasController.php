@@ -182,6 +182,19 @@ class RecetasController extends AbstractController
     }
   }
 
+  public static function buscarNombreSinPeticionID($nombre)
+  {
+    $cbbdd = new CbbddConsultas();
+    $recetaEncontrada = $cbbdd->consulta("SELECT ID FROM recetas WHERE nombre LIKE '%$nombre%'");
+    if (!$recetaEncontrada) {
+      // Aquí el codigo de error deberia ser diferente
+      return RespuestaController::format("200", "No se ha encontrado el alimento");
+    } else {
+      var_dump($recetaEncontrada);
+      return RespuestaController::format("200", $recetaEncontrada);
+    }
+  }
+
 
   private function recetasJSON(Recetas $receta)
   {
