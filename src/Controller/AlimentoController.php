@@ -195,21 +195,20 @@ class AlimentoController extends AbstractController
         return $this->alimentosJSON($alimento);
     }
 
-    public static function buscarNombreSinPeticionID($nombre)
+    public static function buscarNombreSinPeticionID($nombre): Int
     {
         $cbbdd = new CbbddConsultas();
         $alimentosEncontrados = $cbbdd->consulta("SELECT ID FROM alimento WHERE nombre LIKE '%$nombre%'");
         if (!$alimentosEncontrados) {
             // Aquí el codigo de error deberia ser diferente
-            return RespuestaController::format("200", "No se ha encontrado el alimento");
+            return 200;
         } else {
             // Para limpiar el string y quedarme solo con el ID
-            $pos = strpos($alimentosEncontrados, '{');
-            $json = substr($alimentosEncontrados, $pos);
-            $dataJSON = json_decode($json, true);
-            $id = $dataJSON['respuesta'][0]['ID'];
-
-            return RespuestaController::format("200", $id);
+            // $pos = strpos($alimentosEncontrados, '{');
+            // $json = substr($alimentosEncontrados, $pos);
+            // $dataJSON = json_decode($json, true);
+            // $id = $dataJSON['respuesta'][0]['ID'];
+            return $alimentosEncontrados[0]['ID'];
         }
     }
 

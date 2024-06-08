@@ -170,25 +170,12 @@ class ConsumoDiaController extends AbstractController
 
         // Busco el alimento o receta que recibo por el nombre
         if (AlimentoController::buscarNombreSinPeticionID($data['comida'])) {
-            $respuesta[] = AlimentoController::buscarNombreSinPeticionID($data['comida']);
-            $comidaBuscar = "1_" . $respuesta['repuesta'];
+            $comidaBuscar = "1_" . AlimentoController::buscarNombreSinPeticionID($data['comida']);
         } else if (RecetasController::buscarNombreSinPeticionID($data['comida'])) {
             $comidaBuscar = "2_" . RecetasController::buscarNombreSinPeticionID($data['comida']);
         } else {
             return RespuestaController::format("404", "No se encontró la comida.");
         }
-
-
-
-        // var_dump($id);
-        // return RespuestaController::format("200", $comidaBuscar);
-
-        // echo($id);echo "<br>";
-        // echo($data['fecha']);echo "<br>";
-        // echo($data['hora']);echo "<br>";
-        // echo($data['idUsuario']);echo "<br>";
-        echo $comidaBuscar;
-
 
         $consumoDia = $consumoDiaRepository->findOneBy([
             'comida' => $comidaBuscar,

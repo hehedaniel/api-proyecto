@@ -59,6 +59,8 @@ class UsuarioController extends AbstractController
    {
       $data = json_decode($request->getContent(), true);
 
+      var_dump($data);
+
       if ($data) {
          // Si recibo datos busco por ID
          if (isset($data['id'])) {
@@ -72,6 +74,8 @@ class UsuarioController extends AbstractController
       }else {
          return RespuestaController::format("400", "No se han recibido datos");
       }
+
+      var_dump($usuario);
 
       $usuarioJSON = $this->usuarioJSON($usuario);
 
