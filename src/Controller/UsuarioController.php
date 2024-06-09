@@ -20,7 +20,7 @@ class UsuarioController extends AbstractController
    /**
     * @Route("/", name="app_usuario_index", methods={"GET"})
     *
-    * Metodo para obtener todos los usuarios registrados
+    * Método para obtener todos los usuarios registrados
     * @param UsuarioRepository $usuarioRepository
     * @return Response con los usuarios en formato JSON
     */
@@ -53,7 +53,7 @@ class UsuarioController extends AbstractController
 
    /**
     * @Route("/buscar", name="app_usuario_buscar", methods={"POST"})
-    * Metodo que devuelve un usuario en base a un ID o correo recibido mediante POST
+    * Método que devuelve un usuario en base a un ID o correo recibido mediante POST
     * @param Request $request
     * @param UsuarioRepository $usuarioRepository
     * @return Response con el usuario encontrado en formato JSON
@@ -81,10 +81,10 @@ class UsuarioController extends AbstractController
 
    /**
     * @Route("/crear", name="app_usuario_crear", methods={"POST"})
-      * Metodo para crear un nuevo usuario con los datos recibidos mediante POST
-      * @param Request $request
-      * @param UsuarioRepository $usuarioRepository
-      * @return Response con el usuario creado en formato JSON
+    * Método para crear un nuevo usuario con los datos recibidos mediante POST
+    * @param Request $request
+    * @param UsuarioRepository $usuarioRepository
+    * @return Response con el usuario creado en formato JSON
     */
    public function crear(Request $request, UsuarioRepository $usuarioRepository): Response
    {
@@ -124,11 +124,11 @@ class UsuarioController extends AbstractController
    /**
     * @Route("/editar/{id}", name="app_usuario_editar", methods={"PUT"})
     *
-      * Metodo para editar un usuario en base a un ID recibido mediante PUT
-      * @param $id
-      * @param Request $request
-      * @param UsuarioRepository $usuarioRepository
-      * @return Response con el usuario editado en formato JSON
+    * Método para editar un usuario en base a un ID recibido mediante PUT
+    * @param $id
+    * @param Request $request
+    * @param UsuarioRepository $usuarioRepository
+    * @return Response con el usuario editado en formato JSON
     */
    public function editar($id, Request $request, UsuarioRepository $usuarioRepository): Response
    {
@@ -160,12 +160,12 @@ class UsuarioController extends AbstractController
 
    /**
     * @Route("/eliminar", name="app_usuario_eliminar", methods={"DELETE"})
-      *
-      * Metodo para eliminar un usuario en base a un ID o correo recibido mediante DELETE
-      * @param Request $request
-      * @param UsuarioRepository $usuarioRepository
-      * @return Response con mensaje de confirmación
-      * * importante: Metodo en desuso debido a que no hay administración desde la web
+    *
+    * Método para eliminar un usuario en base a un ID o correo recibido mediante DELETE
+    * @param Request $request
+    * @param UsuarioRepository $usuarioRepository
+    * @return Response con mensaje de confirmación
+    * * importante: Método en desuso debido a que no hay administración desde la web
     */
    public function eliminar(Request $request, UsuarioRepository $usuarioRepository): Response
    {
@@ -189,7 +189,7 @@ class UsuarioController extends AbstractController
 
       // return RespuestaController::format("200", "Usuario eliminado correctamente");
 
-      return RespuestaController::format("400", "Metodo en desuso");
+      return RespuestaController::format("400", "Método en desuso");
    }
 
 

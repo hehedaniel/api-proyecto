@@ -13,10 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 use App\Util\RespuestaController;
 
-/**TODO
- * en un rango de fechas para un usuario
- */
-
 /**
  * @Route("/usuariorealizaejercicio")
  */
@@ -24,13 +20,17 @@ class UsuarioRealizaEjercicioController extends AbstractController
 {
    /**
     * @Route("/usuario/{id}", name="usuario_realiza_ejercicio_usuario", methods={"GET"})
+    *
+    * Método para obtener los ejercicios realizados por un usuario en un día concreto
+    * @param UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository
+    * @param EjercicioRepository $ejercicioRepository
+    * @return Response con los ejercicios realizados por un usuario en formato JSON
     */
    public function getByUsuario($id, UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository, EjercicioRepository $ejercicioRepository): Response
    {
 
       $fechaActual = new \DateTime();
-      $fechaActualFormatted = $fechaActual->format('Y-m-d');
-      $fecha = new \DateTime($fechaActualFormatted);
+      $fecha = new \DateTime($fechaActual->format('Y-m-d'));
 
       $usuarioRealizaEjercicio = $usuarioRealizaEjercicioRepository->findBy([
          'idUsuario' => $id,
@@ -49,6 +49,13 @@ class UsuarioRealizaEjercicioController extends AbstractController
 
    /**
     * @Route("/realiza", name="usuario_realiza_ejercicio_crear", methods={"POST"})
+    *
+    * Método para añadir un ejercicio realizado por un usuario
+    * @param Request $request
+    * @param UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository
+    * @param EjercicioRepository $ejercicioRepository
+    * @param UsuarioRepository $usuarioRepository
+    * @return Response con el nuevo ejercicio_realizado por un usuario en formato JSON
     */
 
    public function crear(Request $request, UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository, EjercicioRepository $ejercicioRepository, UsuarioRepository $usuarioRepository): Response
@@ -59,7 +66,6 @@ class UsuarioRealizaEjercicioController extends AbstractController
       $usuarioRealizaEjercicio->setFecha(new \DateTime($data['fecha']));
       $usuarioRealizaEjercicio->setHora(new \DateTime($data['hora']));
       $usuarioRealizaEjercicio->setCalorias($data['calorias']);
-      // Aqui no cambio las calorias ya que quiero probar a intentar sacarlas desde el fronted
       $usuarioRealizaEjercicio->setTiempo($data['tiempo']);
 
       $usuarioRealizaEjercicio->setIdEjercicio($ejercicioRepository->find($data['idEjercicio']));
@@ -72,6 +78,11 @@ class UsuarioRealizaEjercicioController extends AbstractController
 
    /**
     * @Route("/eliminar", name="usuario_realiza_ejercicio_eliminar", methods={"DELETE"})
+    *
+    * Método para eliminar un ejercicio realizado por un usuario
+    * @param Request $request
+    * @param UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository
+    * @return Response con el mensaje de éxito o error
     */
    public function eliminar(UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository, Request $request): Response
    {
@@ -97,11 +108,19 @@ class UsuarioRealizaEjercicioController extends AbstractController
 
    /**
     * @Route("/editar", name="usuario_realiza_ejercicio_editar", methods={"PUT"})
+    *
+    * Método para editar un ejercicio realizado por un usuario
+    * @param Request $request
+    * @param UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository
+    * @return Response con el mensaje de éxito o error
     */
-
    public function editar(Request $request, UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository): Response
    {
       $data = json_decode($request->getContent(), true);
+
+      if (!$data) {
+         return RespuestaController::format("400", "No se ha recibido información");
+      }
 
       $usuarioRealizaEjercicio = $usuarioRealizaEjercicioRepository->findOneBy(
          [
@@ -116,7 +135,6 @@ class UsuarioRealizaEjercicioController extends AbstractController
          return RespuestaController::format("404", "No existe el ejercicio a editar");
       }
 
-      // $usuarioRealizaEjercicio->setHora(new \DateTime($data['hora'])); // No se puede modificar la hora
       $usuarioRealizaEjercicio->setCalorias($data['calorias']);
       $usuarioRealizaEjercicio->setTiempo($data['tiempo']);
 
@@ -126,9 +144,19 @@ class UsuarioRealizaEjercicioController extends AbstractController
    }
 
 
+   /**
+    * Métodos creados para ayudar a la realización de la API
+    */
+
+   /**
+    * Método para convertir un objeto UsuarioRealizaEjercicio en un array JSON
+    * Solo devuelve la información de la entidad UsuarioRealizaEjercicio
+    * @param UsuarioRealizaEjercicio $usuarioRealizaEjercicio
+    * @return array con la información del objeto UsuarioRealizaEjercicio
+    */
    public function usuarioRealizaEjercicioJSON(UsuarioRealizaEjercicio $usuarioRealizaEjercicio)
    {
-      $usuarioRealizaEjercicioJSON = [
+      return [
          "id" => $usuarioRealizaEjercicio->getId(),
          "fecha" => $usuarioRealizaEjercicio->getFecha(),
          "hora" => $usuarioRealizaEjercicio->getHora(),
@@ -137,24 +165,19 @@ class UsuarioRealizaEjercicioController extends AbstractController
          "idEjercicio" => $usuarioRealizaEjercicio->getIdEjercicio(),
          "idUsuario" => $usuarioRealizaEjercicio->getIdUsuario(),
       ];
-      // foreach ($usuarioRealizaEjercicio as $ejerciciosUsuario) {
-      //    $usuarioRealizaEjercicioJSON[] = [
-      //       "id" => $ejerciciosUsuario->getId(),
-      //       "fecha" => $ejerciciosUsuario->getFecha(),
-      //       "hora" => $ejerciciosUsuario->getHora(),
-      //       "calorias" => $ejerciciosUsuario->getCalorias(),
-      //       "tiempo" => $ejerciciosUsuario->getTiempo(),
-      //       "idEjercicio" => $ejerciciosUsuario->getIdEjercicio(),
-      //       "idUsuario" => $ejerciciosUsuario->getIdUsuario(),
-      //    ];
-      // }
-
-      return $usuarioRealizaEjercicioJSON;
    }
 
-   public function usuarioRealizaEjercicioInfoEjercicioJSON(UsuarioRealizaEjercicio $usuarioRealizaEjercicio, String $nombreEjercio)
+   /**
+    * Método para convertir un objeto UsuarioRealizaEjercicio en un array JSON
+    * Devuelve la información de la entidad UsuarioRealizaEjercicio y el nombre del ejercicio
+    * @param UsuarioRealizaEjercicio $usuarioRealizaEjercicio
+    * @param string $nombreEjercio
+    * @return array con la información del objeto UsuarioRealizaEjercicio
+    */
+   public function usuarioRealizaEjercicioInfoEjercicioJSON(UsuarioRealizaEjercicio $usuarioRealizaEjercicio, string $nombreEjercio)
    {
-      $usuarioRealizaEjercicioJSON = [
+
+      return [
          "id" => $usuarioRealizaEjercicio->getId(),
          "fecha" => $usuarioRealizaEjercicio->getFecha(),
          "hora" => $usuarioRealizaEjercicio->getHora(),
@@ -164,18 +187,5 @@ class UsuarioRealizaEjercicioController extends AbstractController
          "idUsuario" => $usuarioRealizaEjercicio->getIdUsuario(),
          "ejNombre" => $nombreEjercio
       ];
-      // foreach ($usuarioRealizaEjercicio as $ejerciciosUsuario) {
-      //    $usuarioRealizaEjercicioJSON[] = [
-      //       "id" => $ejerciciosUsuario->getId(),
-      //       "fecha" => $ejerciciosUsuario->getFecha(),
-      //       "hora" => $ejerciciosUsuario->getHora(),
-      //       "calorias" => $ejerciciosUsuario->getCalorias(),
-      //       "tiempo" => $ejerciciosUsuario->getTiempo(),
-      //       "idEjercicio" => $ejerciciosUsuario->getIdEjercicio(),
-      //       "idUsuario" => $ejerciciosUsuario->getIdUsuario(),
-      //    ];
-      // }
-
-      return $usuarioRealizaEjercicioJSON;
    }
 }
