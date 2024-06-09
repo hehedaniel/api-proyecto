@@ -17,10 +17,8 @@ class EjercicioType extends AbstractType
             ->add('grupoMuscular')
             ->add('dificultad')
             ->add('instrucciones')
-            ->add('caloriasQuemadas')
             ->add('valorMET')
-            ->add('usuarioRealizador')
-            ->add('usuarioProponedor')
+            ->add('idUsuario')
         ;
     }
 

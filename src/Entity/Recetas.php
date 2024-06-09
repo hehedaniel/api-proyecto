@@ -2,15 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\RecetaRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\RecetasRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=RecetaRepository::class)
+ * @ORM\Entity(repositoryClass=RecetasRepository::class)
  */
-class Receta
+class Recetas
 {
     /**
      * @ORM\Id
@@ -67,7 +65,7 @@ class Receta
     /**
      * @ORM\Column(type="float")
      */
-    private $minerales;
+    private $calorias;
 
     /**
      * @ORM\Column(type="text")
@@ -75,20 +73,10 @@ class Receta
     private $imagen;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Usuario::class, mappedBy="receta")
-     */
-    private $usuariosTomadores;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="recetaRegistrada")
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="recetas")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $usuarioCreador;
-
-    public function __construct()
-    {
-        $this->usuariosTomadores = new ArrayCollection();
-    }
+    private $idUsuario;
 
     public function getId(): ?int
     {
@@ -203,14 +191,14 @@ class Receta
         return $this;
     }
 
-    public function getMinerales(): ?float
+    public function getCalorias(): ?float
     {
-        return $this->minerales;
+        return $this->calorias;
     }
 
-    public function setMinerales(float $minerales): self
+    public function setCalorias(float $calorias): self
     {
-        $this->minerales = $minerales;
+        $this->calorias = $calorias;
 
         return $this;
     }
@@ -227,41 +215,14 @@ class Receta
         return $this;
     }
 
-    /**
-     * @return Collection<int, Usuario>
-     */
-    public function getUsuariosTomadores(): Collection
+    public function getIdUsuario(): ?Usuario
     {
-        return $this->usuariosTomadores;
+        return $this->idUsuario;
     }
 
-    public function addUsuariosTomadore(Usuario $usuariosTomadore): self
+    public function setIdUsuario(?Usuario $idUsuario): self
     {
-        if (!$this->usuariosTomadores->contains($usuariosTomadore)) {
-            $this->usuariosTomadores[] = $usuariosTomadore;
-            $usuariosTomadore->addRecetum($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUsuariosTomadore(Usuario $usuariosTomadore): self
-    {
-        if ($this->usuariosTomadores->removeElement($usuariosTomadore)) {
-            $usuariosTomadore->removeRecetum($this);
-        }
-
-        return $this;
-    }
-
-    public function getUsuarioCreador(): ?Usuario
-    {
-        return $this->usuarioCreador;
-    }
-
-    public function setUsuarioCreador(?Usuario $usuarioCreador): self
-    {
-        $this->usuarioCreador = $usuarioCreador;
+        $this->idUsuario = $idUsuario;
 
         return $this;
     }

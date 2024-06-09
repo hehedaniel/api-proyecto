@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\AlimentoRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -67,7 +65,7 @@ class Alimento
     /**
      * @ORM\Column(type="float")
      */
-    private $minerales;
+    private $calorias;
 
     /**
      * @ORM\Column(type="text")
@@ -75,20 +73,10 @@ class Alimento
     private $imagen;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Usuario::class, mappedBy="alimentos")
-     */
-    private $usuarios;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="alimentosPropuestos")
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="alimentos")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $usuarioProponedor;
-
-    public function __construct()
-    {
-        $this->usuarios = new ArrayCollection();
-    }
+    private $idUsuario;
 
     public function getId(): ?int
     {
@@ -203,14 +191,14 @@ class Alimento
         return $this;
     }
 
-    public function getMinerales(): ?float
+    public function getCalorias(): ?float
     {
-        return $this->minerales;
+        return $this->calorias;
     }
 
-    public function setMinerales(float $minerales): self
+    public function setCalorias(float $calorias): self
     {
-        $this->minerales = $minerales;
+        $this->calorias = $calorias;
 
         return $this;
     }
@@ -227,42 +215,16 @@ class Alimento
         return $this;
     }
 
-    /**
-     * @return Collection<int, Usuario>
-     */
-    public function getUsuarios(): Collection
+    public function getIdUsuario(): ?Usuario
     {
-        return $this->usuarios;
+        return $this->idUsuario;
     }
 
-    public function addUsuario(Usuario $usuario): self
+    public function setIdUsuario(?Usuario $idUsuario): self
     {
-        if (!$this->usuarios->contains($usuario)) {
-            $this->usuarios[] = $usuario;
-            $usuario->addAlimento($this);
-        }
+        $this->idUsuario = $idUsuario;
 
         return $this;
     }
 
-    public function removeUsuario(Usuario $usuario): self
-    {
-        if ($this->usuarios->removeElement($usuario)) {
-            $usuario->removeAlimento($this);
-        }
-
-        return $this;
-    }
-
-    public function getUsuarioProponedor(): ?Usuario
-    {
-        return $this->usuarioProponedor;
-    }
-
-    public function setUsuarioProponedor(?Usuario $usuarioProponedor): self
-    {
-        $this->usuarioProponedor = $usuarioProponedor;
-
-        return $this;
-    }
 }

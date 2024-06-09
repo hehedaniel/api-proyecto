@@ -23,20 +23,25 @@ class Peso
     private $fecha;
 
     /**
+     * @ORM\Column(type="time")
+     */
+    private $hora;
+
+    /**
      * @ORM\Column(type="float")
      */
     private $peso;
 
     /**
-     * @ORM\Column(type="float")
-     */
-    private $imc;
-
-    /**
-     * @ORM\OneToOne(targetEntity=Usuario::class, inversedBy="ultimoPeso", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="pesos")
      * @ORM\JoinColumn(nullable=false)
      */
     private $idUsuario;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $IMC;
 
     public function getId(): ?int
     {
@@ -55,6 +60,18 @@ class Peso
         return $this;
     }
 
+    public function getHora(): ?\DateTimeInterface
+    {
+        return $this->hora;
+    }
+
+    public function setHora(\DateTimeInterface $hora): self
+    {
+        $this->hora = $hora;
+
+        return $this;
+    }
+
     public function getPeso(): ?float
     {
         return $this->peso;
@@ -67,27 +84,32 @@ class Peso
         return $this;
     }
 
-    public function getImc(): ?float
-    {
-        return $this->imc;
-    }
-
-    public function setImc(float $imc): self
-    {
-        $this->imc = $imc;
-
-        return $this;
-    }
-
     public function getIdUsuario(): ?Usuario
     {
         return $this->idUsuario;
     }
 
-    public function setIdUsuario(Usuario $idUsuario): self
+    public function setIdUsuario(?Usuario $idUsuario): self
     {
         $this->idUsuario = $idUsuario;
 
         return $this;
+    }
+
+    public function getIMC(): ?float
+    {
+        return $this->IMC;
+    }
+
+    public function setIMC(float $IMC): self
+    {
+        $this->IMC = $IMC;
+
+        return $this;
+    }
+
+    public function isFechaBetween($fechaInicio, $fechaFin)
+    {
+        return $this->getFecha() >= $fechaInicio && $this->getFecha() <= $fechaFin;
     }
 }

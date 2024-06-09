@@ -14,7 +14,6 @@
                 <th>GrupoMuscular</th>
                 <th>Dificultad</th>
                 <th>Instrucciones</th>
-                <th>CaloriasQuemadas</th>
                 <th>ValorMET</th>
                 <th>actions</th>
             </tr>
@@ -28,7 +27,6 @@
                 <td>{{ ejercicio.grupoMuscular }}</td>
                 <td>{{ ejercicio.dificultad }}</td>
                 <td>{{ ejercicio.instrucciones }}</td>
-                <td>{{ ejercicio.caloriasQuemadas }}</td>
                 <td>{{ ejercicio.valorMET }}</td>
                 <td>
                     <a href="{{ path('app_ejercicio_show', {'id': ejercicio.id}) }}">show</a>
@@ -37,7 +35,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="9">no records found</td>
+                <td colspan="8">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

@@ -3,12 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Enlace;
-use App\Form\EnlaceType;
 use App\Repository\EnlaceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Util\RespuestaController;
+use App\Repository\EjercicioRepository;
 
 /**
  * @Route("/enlace")
@@ -20,71 +21,143 @@ class EnlaceController extends AbstractController
      */
     public function index(EnlaceRepository $enlaceRepository): Response
     {
-        return $this->render('enlace/index.html.twig', [
-            'enlaces' => $enlaceRepository->findAll(),
-        ]);
+        $enlaces = $enlaceRepository->findAll();
+
+        if (!$enlaces) {
+            return RespuestaController::format("404", "No hay enlaces registrados");
+        }
+
+        $enlacesJSON = [];
+
+        foreach ($enlaces as $enlace) {
+            $enlacesJSON[] = [
+                "id" => $enlace->getId(),
+                "enlace" => $enlace->getEnlace(),
+                "idEjercicio" => $enlace->getIdEjercicio()->getId(),
+            ];
+        }
+
+        return RespuestaController::format("200", $enlacesJSON);
     }
 
     /**
-     * @Route("/new", name="app_enlace_new", methods={"GET", "POST"})
+     * @Route("/{id}", name="app_enlace_buscar", methods={"GET"})
      */
-    public function new(Request $request, EnlaceRepository $enlaceRepository): Response
+    public function buscar($id, EnlaceRepository $enlaceRepository): Response
     {
+        $enlace = $enlaceRepository->find($id);
+
+        if (!$enlace) {
+            return RespuestaController::format("404", "Enlace no encontrado");
+        }
+
+        $enlaceJSON = $this->enlaceJSON($enlace);
+
+        return RespuestaController::format("200", $enlaceJSON);
+    }
+
+    /**
+     * @Route("/crear", name="app_enlace_crear", methods={"POST"})
+     */
+    public function crear(Request $request, EnlaceRepository $enlaceRepository, EjercicioRepository $ejercicioRepository): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
+        }
+
         $enlace = new Enlace();
-        $form = $this->createForm(EnlaceType::class, $enlace);
-        $form->handleRequest($request);
+        $enlace->setEnlace($data['enlace']);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $enlaceRepository->add($enlace, true);
-
-            return $this->redirectToRoute('app_enlace_index', [], Response::HTTP_SEE_OTHER);
+        // Buscar el ejercicio por ID
+        $ejercicio = $ejercicioRepository->find($data['idEjercicio']);
+        if (!$ejercicio) {
+            return RespuestaController::format("400", "Ejercicio no encontrado");
         }
+        $enlace->setIdEjercicio($ejercicio);
 
-        return $this->renderForm('enlace/new.html.twig', [
-            'enlace' => $enlace,
-            'form' => $form,
-        ]);
+        $enlaceRepository->add($enlace, true);
+
+        $enlaceJSON = $this->enlaceJSON($enlace);
+
+        return RespuestaController::format("200", $enlaceJSON);
     }
 
     /**
-     * @Route("/{id}", name="app_enlace_show", methods={"GET"})
+     * @Route("/editar/{id}", name="app_enlace_editar", methods={"PUT"})
      */
-    public function show(Enlace $enlace): Response
+    public function editar($id, Request $request, EnlaceRepository $enlaceRepository, EjercicioRepository $ejercicioRepository): Response
     {
-        return $this->render('enlace/show.html.twig', [
-            'enlace' => $enlace,
-        ]);
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
+        }
+
+        // Buscar enlace a editar por ID
+        $enlace = $enlaceRepository->find($id);
+
+        if (!$enlace) {
+            return RespuestaController::format("404", "Enlace a editar no encontrado");
+        }
+
+        $enlace->setEnlace($data['enlace']);
+
+        $ejercicio = $ejercicioRepository->find($data['idEjercicio']);
+        if (!$ejercicio) {
+            return RespuestaController::format("400", "Datos no modificados: Ejercicio no encontrado");
+        }
+        $enlace->setIdEjercicio($ejercicio);
+
+        $enlaceRepository->add($enlace, true);
+
+        $enlaceJSON = $this->enlaceJSON($enlace);
+
+        return RespuestaController::format("200", $enlaceJSON);
     }
 
     /**
-     * @Route("/{id}/edit", name="app_enlace_edit", methods={"GET", "POST"})
+     * @Route("/eliminar", name="app_enlace_eliminar", methods={"DELETE"})
      */
-    public function edit(Request $request, Enlace $enlace, EnlaceRepository $enlaceRepository): Response
+    public function eliminar(Request $request, EnlaceRepository $enlaceRepository): Response
     {
-        $form = $this->createForm(EnlaceType::class, $enlace);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $enlaceRepository->add($enlace, true);
+        // if ($request->getMethod() !== 'DELETE') {
+        //     return RespuestaController::format("405", "Método no permitido");
+        // }
 
-            return $this->redirectToRoute('app_enlace_index', [], Response::HTTP_SEE_OTHER);
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
         }
 
-        return $this->renderForm('enlace/edit.html.twig', [
-            'enlace' => $enlace,
-            'form' => $form,
-        ]);
-    }
-
-    /**
-     * @Route("/{id}", name="app_enlace_delete", methods={"POST"})
-     */
-    public function delete(Request $request, Enlace $enlace, EnlaceRepository $enlaceRepository): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$enlace->getId(), $request->request->get('_token'))) {
-            $enlaceRepository->remove($enlace, true);
+        if (isset($data['id'])) {
+            $enlace = $enlaceRepository->find($data['id']);
+        } else {
+            return RespuestaController::format("400", "ID no proporcionado");
         }
 
-        return $this->redirectToRoute('app_enlace_index', [], Response::HTTP_SEE_OTHER);
+        if (!$enlace) {
+            return RespuestaController::format("404", "Enlace no existente");
+        }
+
+        $enlaceRepository->remove($enlace, true);
+
+        return RespuestaController::format("200", "Enlace eliminado correctamente");
     }
+
+    private function enlaceJSON(Enlace $enlace)
+    {
+        $enlaceJSON = [
+            "id" => $enlace->getId(),
+            "enlace" => $enlace->getEnlace(),
+            "idEjercicio" => $enlace->getIdEjercicio()->getId(),
+        ];
+
+        return $enlaceJSON;
+    }
+
+
 }

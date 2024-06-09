@@ -38,10 +38,15 @@ class ConsumoDia
     private $momento;
 
     /**
-     * @ORM\OneToOne(targetEntity=Usuario::class, inversedBy="consumoDia", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="consumoDias")
      * @ORM\JoinColumn(nullable=false)
      */
     private $idUsuario;
+
+    /**
+     * @ORM\Column(type="time")
+     */
+    private $hora;
 
     public function getId(): ?int
     {
@@ -101,10 +106,27 @@ class ConsumoDia
         return $this->idUsuario;
     }
 
-    public function setIdUsuario(Usuario $idUsuario): self
+    public function setIdUsuario(?Usuario $idUsuario): self
     {
         $this->idUsuario = $idUsuario;
 
         return $this;
+    }
+
+    public function getHora(): ?\DateTimeInterface
+    {
+        return $this->hora;
+    }
+
+    public function setHora(\DateTimeInterface $hora): self
+    {
+        $this->hora = $hora;
+
+        return $this;
+    }
+
+    public function isFechaBetween($fechaInicio, $fechaFin)
+    {
+        return $this->getFecha() >= $fechaInicio && $this->getFecha() <= $fechaFin;
     }
 }

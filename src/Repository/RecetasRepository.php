@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Receta;
+use App\Entity\Recetas;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Receta>
+ * @extends ServiceEntityRepository<Recetas>
  *
- * @method Receta|null find($id, $lockMode = null, $lockVersion = null)
- * @method Receta|null findOneBy(array $criteria, array $orderBy = null)
- * @method Receta[]    findAll()
- * @method Receta[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Recetas|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Recetas|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Recetas[]    findAll()
+ * @method Recetas[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class RecetaRepository extends ServiceEntityRepository
+class RecetasRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Receta::class);
+        parent::__construct($registry, Recetas::class);
     }
 
-    public function add(Receta $entity, bool $flush = false): void
+    public function add(Recetas $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class RecetaRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Receta $entity, bool $flush = false): void
+    public function remove(Recetas $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class RecetaRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Receta[] Returns an array of Receta objects
+//     * @return Recetas[] Returns an array of Recetas objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class RecetaRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Receta
+//    public function findOneBySomeField($value): ?Recetas
 //    {
 //        return $this->createQueryBuilder('r')
 //            ->andWhere('r.exampleField = :val')

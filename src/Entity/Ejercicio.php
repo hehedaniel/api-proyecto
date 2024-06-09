@@ -45,35 +45,30 @@ class Ejercicio
     private $instrucciones;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="integer")
      */
-    private $caloriasQuemadas;
+    private $valorMET;
 
     /**
-     * @ORM\OneToMany(targetEntity=Enlace::class, mappedBy="idEjercicio")
+     * @ORM\OneToMany(targetEntity=Enlace::class, mappedBy="idEjercicio", orphanRemoval=true)
      */
     private $enlaces;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Usuario::class, mappedBy="ejercicioRealizado")
-     */
-    private $usuarioRealizador;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="ejercicioPropuesto")
+     * @ORM\ManyToOne(targetEntity=Usuario::class, inversedBy="ejercicios")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $usuarioProponedor;
+    private $idUsuario;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\OneToMany(targetEntity=UsuarioRealizaEjercicio::class, mappedBy="idEjercicio", orphanRemoval=true)
      */
-    private $valorMET;
+    private $usuarioRealizaEjercicios;
 
     public function __construct()
     {
         $this->enlaces = new ArrayCollection();
-        $this->usuarioRealizador = new ArrayCollection();
+        $this->usuarioRealizaEjercicios = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -141,14 +136,14 @@ class Ejercicio
         return $this;
     }
 
-    public function getCaloriasQuemadas(): ?float
+    public function getValorMET(): ?int
     {
-        return $this->caloriasQuemadas;
+        return $this->valorMET;
     }
 
-    public function setCaloriasQuemadas(float $caloriasQuemadas): self
+    public function setValorMET(int $valorMET): self
     {
-        $this->caloriasQuemadas = $caloriasQuemadas;
+        $this->valorMET = $valorMET;
 
         return $this;
     }
@@ -183,53 +178,44 @@ class Ejercicio
         return $this;
     }
 
+    public function getIdUsuario(): ?Usuario
+    {
+        return $this->idUsuario;
+    }
+
+    public function setIdUsuario(?Usuario $idUsuario): self
+    {
+        $this->idUsuario = $idUsuario;
+
+        return $this;
+    }
+
     /**
-     * @return Collection<int, Usuario>
+     * @return Collection<int, UsuarioRealizaEjercicio>
      */
-    public function getUsuarioRealizador(): Collection
+    public function getUsuarioRealizaEjercicios(): Collection
     {
-        return $this->usuarioRealizador;
+        return $this->usuarioRealizaEjercicios;
     }
 
-    public function addUsuarioRealizador(Usuario $usuarioRealizador): self
+    public function addUsuarioRealizaEjercicio(UsuarioRealizaEjercicio $usuarioRealizaEjercicio): self
     {
-        if (!$this->usuarioRealizador->contains($usuarioRealizador)) {
-            $this->usuarioRealizador[] = $usuarioRealizador;
-            $usuarioRealizador->addEjercicioRealizado($this);
+        if (!$this->usuarioRealizaEjercicios->contains($usuarioRealizaEjercicio)) {
+            $this->usuarioRealizaEjercicios[] = $usuarioRealizaEjercicio;
+            $usuarioRealizaEjercicio->setIdEjercicio($this);
         }
 
         return $this;
     }
 
-    public function removeUsuarioRealizador(Usuario $usuarioRealizador): self
+    public function removeUsuarioRealizaEjercicio(UsuarioRealizaEjercicio $usuarioRealizaEjercicio): self
     {
-        if ($this->usuarioRealizador->removeElement($usuarioRealizador)) {
-            $usuarioRealizador->removeEjercicioRealizado($this);
+        if ($this->usuarioRealizaEjercicios->removeElement($usuarioRealizaEjercicio)) {
+            // set the owning side to null (unless already changed)
+            if ($usuarioRealizaEjercicio->getIdEjercicio() === $this) {
+                $usuarioRealizaEjercicio->setIdEjercicio(null);
+            }
         }
-
-        return $this;
-    }
-
-    public function getUsuarioProponedor(): ?Usuario
-    {
-        return $this->usuarioProponedor;
-    }
-
-    public function setUsuarioProponedor(?Usuario $usuarioProponedor): self
-    {
-        $this->usuarioProponedor = $usuarioProponedor;
-
-        return $this;
-    }
-
-    public function getValorMET(): ?float
-    {
-        return $this->valorMET;
-    }
-
-    public function setValorMET(float $valorMET): self
-    {
-        $this->valorMET = $valorMET;
 
         return $this;
     }

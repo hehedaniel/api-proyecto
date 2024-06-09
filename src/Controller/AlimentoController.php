@@ -3,12 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Alimento;
-use App\Form\AlimentoType;
 use App\Repository\AlimentoRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
+use App\Util\RespuestaController;
+use App\Util\CbbddConsultas;
 
 /**
  * @Route("/alimento")
@@ -16,75 +19,231 @@ use Symfony\Component\Routing\Annotation\Route;
 class AlimentoController extends AbstractController
 {
     /**
-     * @Route("/", name="app_alimento_index", methods={"GET"})
+     * @Route("/index", name="app_alimento_index", methods={"GET"})
      */
+
     public function index(AlimentoRepository $alimentoRepository): Response
     {
-        return $this->render('alimento/index.html.twig', [
-            'alimentos' => $alimentoRepository->findAll(),
-        ]);
+        $alimentos = $alimentoRepository->findAll();
+
+        if (!$alimentos) {
+            return RespuestaController::format("404", "No hay alimentos registrados");
+        }
+
+        $alimentosJSON = [];
+
+        foreach ($alimentos as $alimento) {
+            $alimentosJSON[] = $this->alimentosJSON($alimento);
+        }
+
+        return RespuestaController::format("200", $alimentosJSON);
     }
 
     /**
-     * @Route("/new", name="app_alimento_new", methods={"GET", "POST"})
+     * @Route("/index/{id}", name="app_alimento_buscar", methods={"GET"})
      */
-    public function new(Request $request, AlimentoRepository $alimentoRepository): Response
+    public function buscar($id, AlimentoRepository $alimentoRepository): Response
     {
+        $alimento = $alimentoRepository->find($id);
+
+        if (!$alimento) {
+            //Si no encuentra por ID busca por nombre
+            if ($alimentoRepository->findOneBy(["nombre" => $id])) {
+                $alimento = $alimentoRepository->findOneBy(["nombre" => $id]);
+            } else {
+                return RespuestaController::format("404", "No se ha encontrado el alimento");
+            }
+        }
+
+        $alimentoJSON = $this->alimentosJSON($alimento);
+
+        return RespuestaController::format("200", $alimentoJSON);
+    }
+
+    /**
+     * @Route("/crear", name="app_alimento_crear", methods={"POST"})
+     */
+    public function crear(Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository)
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // if ($data){
+        //     return RespuestaController::format("400", $data);
+        // }
+
+        // return $data;
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
+        }
+
+        if ($alimentoRepository->findOneBy(["nombre" => $data["alimento"]["nombre"]])) {
+            return RespuestaController::format("200", "El alimento ya existe");
+        }
+
         $alimento = new Alimento();
-        $form = $this->createForm(AlimentoType::class, $alimento);
-        $form->handleRequest($request);
+        $alimento->setNombre($data["alimento"]["nombre"]);
+        $alimento->setDescripcion($data["alimento"]["descripcion"]);
+        $alimento->setMarca($data["alimento"]["marca"]);
+        $alimento->setCantidad($data["alimento"]["cantidad"]);
+        $alimento->setProteinas($data["alimento"]["proteinas"]);
+        $alimento->setGrasas($data["alimento"]["grasas"]);
+        $alimento->setCarbohidratos($data["alimento"]["carbohidratos"]);
+        $alimento->setAzucares($data["alimento"]["azucares"]);
+        $alimento->setVitaminas($data["alimento"]["vitaminas"]);
+        $alimento->setCalorias($data["alimento"]["calorias"]);
+        $alimento->setImagen($data["alimento"]["imagen"]);
+        //Cambio de idUsuario a usuario por problema recibido en las pruebas
+        $usuario = $usuarioRepository->find($data["alimento"]["idUsuario"]);
+        $alimento->setIdUsuario($usuario);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $alimentoRepository->add($alimento, true);
+        $alimentoRepository->add($alimento, true);
 
-            return $this->redirectToRoute('app_alimento_index', [], Response::HTTP_SEE_OTHER);
-        }
+        $alimentoJSON = $this->alimentosJSON($alimento);
 
-        return $this->renderForm('alimento/new.html.twig', [
-            'alimento' => $alimento,
-            'form' => $form,
-        ]);
+        return RespuestaController::format("200", $alimentoJSON);
     }
 
     /**
-     * @Route("/{id}", name="app_alimento_show", methods={"GET"})
+     * @Route("/editar/{id}", name="app_alimento_editar", methods={"PUT"})
      */
-    public function show(Alimento $alimento): Response
+    public function editar($id, Request $request, AlimentoRepository $alimentoRepository, UsuarioRepository $usuarioRepository): Response
     {
-        return $this->render('alimento/show.html.twig', [
-            'alimento' => $alimento,
-        ]);
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
+        }
+
+        $alimento = $alimentoRepository->find($id);
+
+        if (!$alimento) {
+            return RespuestaController::format("404", "No se ha encontrado el alimento");
+        }
+
+        $alimento->setNombre($data["nombre"]);
+        $alimento->setDescripcion($data["descripcion"]);
+        $alimento->setMarca($data["marca"]);
+        $alimento->setCantidad($data["cantidad"]);
+        $alimento->setProteinas($data["proteinas"]);
+        $alimento->setGrasas($data["grasas"]);
+        $alimento->setCarbohidratos($data["carbohidratos"]);
+        $alimento->setAzucares($data["azucares"]);
+        $alimento->setVitaminas($data["vitaminas"]);
+        $alimento->setCalorias($data["calorias"]);
+        $alimento->setImagen($data["imagen"]);
+        //Cambio de idUsuario a usuario por problema recibido en las pruebas
+        $usuario = $usuarioRepository->find($data["idUsuario"]);
+        $alimento->setIdUsuario($usuario);
+
+        $alimentoRepository->add($alimento, true);
+
+        $alimentoJSON = $this->alimentosJSON($alimento);
+
+        return RespuestaController::format("200", $alimentoJSON);
     }
 
     /**
-     * @Route("/{id}/edit", name="app_alimento_edit", methods={"GET", "POST"})
+     * @Route("/eliminar", name="app_alimento_eliminar", methods={"DELETE"})
      */
-    public function edit(Request $request, Alimento $alimento, AlimentoRepository $alimentoRepository): Response
+    public function eliminar(Request $request, AlimentoRepository $alimentoRepository): Response
     {
-        $form = $this->createForm(AlimentoType::class, $alimento);
-        $form->handleRequest($request);
+        $data = json_decode($request->getContent(), true);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $alimentoRepository->add($alimento, true);
-
-            return $this->redirectToRoute('app_alimento_index', [], Response::HTTP_SEE_OTHER);
+        if (!$data) {
+            return RespuestaController::format("400", "No se han recibido datos");
         }
 
-        return $this->renderForm('alimento/edit.html.twig', [
-            'alimento' => $alimento,
-            'form' => $form,
-        ]);
+        $alimento = $alimentoRepository->find($data["id"]);
+
+        if (!$alimento) {
+            return RespuestaController::format("404", "No se ha encontrado el alimento");
+        }
+
+        $alimentoRepository->remove($alimento, true);
+
+        return RespuestaController::format("200", "Alimento eliminado");
     }
 
     /**
-     * @Route("/{id}", name="app_alimento_delete", methods={"POST"})
+     * @Route("/nombre", name="app_alimento_nombre", methods={"POST"})
      */
-    public function delete(Request $request, Alimento $alimento, AlimentoRepository $alimentoRepository): Response
+    public function nombre(Request $request, AlimentoRepository $alimentoRepository)
     {
-        if ($this->isCsrfTokenValid('delete'.$alimento->getId(), $request->request->get('_token'))) {
-            $alimentoRepository->remove($alimento, true);
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data["nombre"])) {
+            return RespuestaController::format("400", "No se ha recibido el nombre del alimento");
         }
 
-        return $this->redirectToRoute('app_alimento_index', [], Response::HTTP_SEE_OTHER);
+        $nombreBuscar = $data["nombre"];
+
+        $cbbdd = new CbbddConsultas();
+        $alimentosEncontrados = $cbbdd->consulta("SELECT * FROM alimento WHERE nombre LIKE '%$nombreBuscar%'");
+        if (!$alimentosEncontrados) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        }
+
+        return RespuestaController::format("200", $alimentosEncontrados);
+    }
+
+    public function buscarAlimento(AlimentoRepository $alimentoRepository, $id)
+    {
+        $alimento = $alimentoRepository->find($id);
+
+        return $this->alimentosJSON($alimento);
+    }
+
+    public static function buscarNombreSinPeticionID($nombre): Int
+    {
+        $cbbdd = new CbbddConsultas();
+        $alimentosEncontrados = $cbbdd->consulta("SELECT ID FROM alimento WHERE nombre LIKE '%$nombre%'");
+        if (!$alimentosEncontrados) {
+            // Aquí el codigo de error deberia ser diferente
+            return 200;
+        } else {
+            // Para limpiar el string y quedarme solo con el ID
+            // $pos = strpos($alimentosEncontrados, '{');
+            // $json = substr($alimentosEncontrados, $pos);
+            // $dataJSON = json_decode($json, true);
+            // $id = $dataJSON['respuesta'][0]['ID'];
+            return $alimentosEncontrados[0]['ID'];
+        }
+    }
+
+    public function alimentosJSON(Alimento $alimento)
+    {
+
+        $alimentosJSON = [
+            "id" => $alimento->getId(),
+            "nombre" => $alimento->getNombre(),
+            "descripcion" => $alimento->getDescripcion(),
+            "marca" => $alimento->getMarca(),
+            "cantidad" => $alimento->getCantidad(),
+            "proteinas" => $alimento->getProteinas(),
+            "grasas" => $alimento->getGrasas(),
+            "carbohidratos" => $alimento->getCarbohidratos(),
+            "azucares" => $alimento->getAzucares(),
+            "vitaminas" => $alimento->getVitaminas(),
+            "calorias" => $alimento->getCalorias(),
+            "imagen" => $alimento->getImagen(),
+            "idUsuario" => $alimento->getIdUsuario(),
+        ];
+
+
+        return $alimentosJSON;
+    }
+
+    public static function buscarNombreSinPeticion($nombre)
+    {
+        $cbbdd = new CbbddConsultas();
+        $alimentoencontrado = $cbbdd->consulta("SELECT * FROM recetas WHERE nombre LIKE '%$nombre%'");
+        if (!$alimentoencontrado) {
+            // Aquí el codigo de error deberia ser diferente
+            return RespuestaController::format("200", "No se ha encontrado el alimento");
+        } else {
+            return RespuestaController::format("200", $alimentoencontrado);
+        }
     }
 }

@@ -10,10 +10,13 @@
             <tr>
                 <th>Id</th>
                 <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Correo</th>
+                <th>Correo_v</th>
+                <th>Contrasena</th>
                 <th>Rol</th>
                 <th>Edad</th>
                 <th>Altura</th>
-                <th>Peso</th>
                 <th>Objetivo_opt</th>
                 <th>Objetivo_num</th>
                 <th>actions</th>
@@ -24,10 +27,13 @@
             <tr>
                 <td>{{ usuario.id }}</td>
                 <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.apellidos }}</td>
+                <td>{{ usuario.correo }}</td>
+                <td>{{ usuario.correoV }}</td>
+                <td>{{ usuario.contrasena }}</td>
                 <td>{{ usuario.rol ? 'Yes' : 'No' }}</td>
                 <td>{{ usuario.edad }}</td>
                 <td>{{ usuario.altura }}</td>
-                <td>{{ usuario.peso }}</td>
                 <td>{{ usuario.objetivoOpt }}</td>
                 <td>{{ usuario.objetivoNum }}</td>
                 <td>
@@ -37,7 +43,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="9">no records found</td>
+                <td colspan="12">no records found</td>
             </tr>
         {% endfor %}
         </tbody>

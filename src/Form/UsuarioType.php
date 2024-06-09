@@ -13,17 +13,15 @@ class UsuarioType extends AbstractType
     {
         $builder
             ->add('nombre')
+            ->add('apellidos')
+            ->add('correo')
+            ->add('correo_v')
+            ->add('contrasena')
             ->add('rol')
             ->add('edad')
             ->add('altura')
-            ->add('peso')
             ->add('objetivo_opt')
             ->add('objetivo_num')
-            ->add('ultimoPeso')
-            ->add('consumoDia')
-            ->add('alimentos')
-            ->add('receta')
-            ->add('ejercicioRealizado')
         ;
     }
 

@@ -2,6 +2,22 @@
 
 namespace App\Entity;
 
+/**
+ * Entidad que consta de
+ * - nombre: Nombre del usuario
+ * - apellidos: Apellidos del usuario
+ * - correo: Correo del usuario
+ * - contrasena: Contraseña del usuario
+ * - edad: Edad del usuario
+ * - altura: Altura del usuario
+ * - objetivo_opt: Objetivo del usuario
+ * - objetivo_num: Número del objetivo del usuario
+
+ * - id: Identificador del usuario (automatico)
+ * - rol: Rol del usuario (automatico)
+ * - correo_v: Correo verififcado (por defecto false)
+ */
+
 use App\Repository\UsuarioRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -25,6 +41,26 @@ class Usuario
     private $nombre;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $apellidos;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $correo;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $correo_v;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $contrasena;
+
+    /**
      * @ORM\Column(type="boolean")
      */
     private $rol;
@@ -40,69 +76,58 @@ class Usuario
     private $altura;
 
     /**
-     * @ORM\Column(type="float")
-     */
-    private $peso;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $objetivo_opt;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="float")
      */
     private $objetivo_num;
 
     /**
-     * @ORM\OneToOne(targetEntity=Peso::class, mappedBy="idUsuario", cascade={"persist", "remove"})
-     */
-    private $ultimoPeso;
-
-    /**
-     * @ORM\OneToOne(targetEntity=ConsumoDia::class, mappedBy="idUsuario", cascade={"persist", "remove"})
-     */
-    private $consumoDia;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Alimento::class, inversedBy="usuarios")
+     * @ORM\OneToMany(targetEntity=Alimento::class, mappedBy="idUsuario", orphanRemoval=true)
      */
     private $alimentos;
 
     /**
-     * @ORM\OneToMany(targetEntity=Alimento::class, mappedBy="usuarioProponedor")
+     * @ORM\OneToMany(targetEntity=ConsumoDia::class, mappedBy="idUsuario")
      */
-    private $alimentosPropuestos;
+    private $consumoDias;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Receta::class, inversedBy="usuariosTomadores")
+     * @ORM\OneToMany(targetEntity=Recetas::class, mappedBy="idUsuario", orphanRemoval=true)
      */
-    private $receta;
+    private $recetas;
 
     /**
-     * @ORM\OneToMany(targetEntity=Receta::class, mappedBy="usuarioCreador")
+     * @ORM\OneToMany(targetEntity=Peso::class, mappedBy="idUsuario", orphanRemoval=true)
      */
-    private $recetaRegistrada;
+    private $pesos;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Ejercicio::class, inversedBy="usuarioRealizador")
+     * @ORM\OneToMany(targetEntity=UsuarioRealizaEjercicio::class, mappedBy="idUsuario")
      */
-    private $ejercicioRealizado;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Ejercicio::class, mappedBy="usuarioProponedor")
-     */
-    private $ejercicioPropuesto;
+    private $usuarioRealizaEjercicios;
 
     public function __construct()
     {
         $this->alimentos = new ArrayCollection();
-        $this->alimentosPropuestos = new ArrayCollection();
-        $this->receta = new ArrayCollection();
-        $this->recetaRegistrada = new ArrayCollection();
-        $this->ejercicioRealizado = new ArrayCollection();
-        $this->ejercicioPropuesto = new ArrayCollection();
+        $this->consumoDias = new ArrayCollection();
+        $this->recetas = new ArrayCollection();
+        $this->pesos = new ArrayCollection();
+        $this->usuarioRealizaEjercicios = new ArrayCollection();
     }
+
+    /**
+     * @ORM\OneToMany(targetEntity=Ejercicio::class, mappedBy="idUsuario")
+     */
+    // private $ejercicios;
+
+    // public function __construct()
+    // {
+    //     $this->ejercicios = new ArrayCollection();
+    // }
 
     public function getId(): ?int
     {
@@ -121,12 +146,60 @@ class Usuario
         return $this;
     }
 
+    public function getApellidos(): ?string
+    {
+        return $this->apellidos;
+    }
+
+    public function setApellidos(string $apellidos): self
+    {
+        $this->apellidos = $apellidos;
+
+        return $this;
+    }
+
+    public function getCorreo(): ?string
+    {
+        return $this->correo;
+    }
+
+    public function setCorreo(string $correo): self
+    {
+        $this->correo = $correo;
+
+        return $this;
+    }
+
+    public function getCorreoV(): ?string
+    {
+        return $this->correo_v;
+    }
+
+    public function setCorreoV(string $correo_v): self
+    {
+        $this->correo_v = $correo_v;
+
+        return $this;
+    }
+
+    public function getContrasena(): ?string
+    {
+        return $this->contrasena;
+    }
+
+    public function setContrasena(string $contrasena): self
+    {
+        $this->contrasena = $contrasena;
+
+        return $this;
+    }
+
     public function isRol(): ?bool
     {
         return $this->rol;
     }
 
-    public function setRol(bool $rol): self
+    public function setRol(bool $rol = false): self
     {
         $this->rol = $rol;
 
@@ -157,18 +230,6 @@ class Usuario
         return $this;
     }
 
-    public function getPeso(): ?float
-    {
-        return $this->peso;
-    }
-
-    public function setPeso(float $peso): self
-    {
-        $this->peso = $peso;
-
-        return $this;
-    }
-
     public function getObjetivoOpt(): ?string
     {
         return $this->objetivo_opt;
@@ -181,51 +242,47 @@ class Usuario
         return $this;
     }
 
-    public function getObjetivoNum(): ?string
+    public function getObjetivoNum(): ?float
     {
         return $this->objetivo_num;
     }
 
-    public function setObjetivoNum(string $objetivo_num): self
+    public function setObjetivoNum(float $objetivo_num): self
     {
         $this->objetivo_num = $objetivo_num;
 
         return $this;
     }
 
-    public function getUltimoPeso(): ?Peso
-    {
-        return $this->ultimoPeso;
-    }
+    /**
+     * @return Collection<int, Ejercicio>
+     */
+    // public function getEjercicios(): Collection
+    // {
+    //     return $this->ejercicios;
+    // }
 
-    public function setUltimoPeso(Peso $ultimoPeso): self
-    {
-        // set the owning side of the relation if necessary
-        if ($ultimoPeso->getIdUsuario() !== $this) {
-            $ultimoPeso->setIdUsuario($this);
-        }
+    // public function addEjercicio(Ejercicio $ejercicio): self
+    // {
+    //     if (!$this->ejercicios->contains($ejercicio)) {
+    //         $this->ejercicios[] = $ejercicio;
+    //         $ejercicio->setIdUsuario($this);
+    //     }
 
-        $this->ultimoPeso = $ultimoPeso;
+    //     return $this;
+    // }
 
-        return $this;
-    }
+    // public function removeEjercicio(Ejercicio $ejercicio): self
+    // {
+    //     if ($this->ejercicios->removeElement($ejercicio)) {
+    //         // set the owning side to null (unless already changed)
+    //         if ($ejercicio->getIdUsuario() === $this) {
+    //             $ejercicio->setIdUsuario(null);
+    //         }
+    //     }
 
-    public function getConsumoDia(): ?ConsumoDia
-    {
-        return $this->consumoDia;
-    }
-
-    public function setConsumoDia(ConsumoDia $consumoDia): self
-    {
-        // set the owning side of the relation if necessary
-        if ($consumoDia->getIdUsuario() !== $this) {
-            $consumoDia->setIdUsuario($this);
-        }
-
-        $this->consumoDia = $consumoDia;
-
-        return $this;
-    }
+    //     return $this;
+    // }
 
     /**
      * @return Collection<int, Alimento>
@@ -239,6 +296,7 @@ class Usuario
     {
         if (!$this->alimentos->contains($alimento)) {
             $this->alimentos[] = $alimento;
+            $alimento->setIdUsuario($this);
         }
 
         return $this;
@@ -246,35 +304,10 @@ class Usuario
 
     public function removeAlimento(Alimento $alimento): self
     {
-        $this->alimentos->removeElement($alimento);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Alimento>
-     */
-    public function getAlimentosPropuestos(): Collection
-    {
-        return $this->alimentosPropuestos;
-    }
-
-    public function addAlimentosPropuesto(Alimento $alimentosPropuesto): self
-    {
-        if (!$this->alimentosPropuestos->contains($alimentosPropuesto)) {
-            $this->alimentosPropuestos[] = $alimentosPropuesto;
-            $alimentosPropuesto->setUsuarioProponedor($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAlimentosPropuesto(Alimento $alimentosPropuesto): self
-    {
-        if ($this->alimentosPropuestos->removeElement($alimentosPropuesto)) {
+        if ($this->alimentos->removeElement($alimento)) {
             // set the owning side to null (unless already changed)
-            if ($alimentosPropuesto->getUsuarioProponedor() === $this) {
-                $alimentosPropuesto->setUsuarioProponedor(null);
+            if ($alimento->getIdUsuario() === $this) {
+                $alimento->setIdUsuario(null);
             }
         }
 
@@ -282,53 +315,29 @@ class Usuario
     }
 
     /**
-     * @return Collection<int, Receta>
+     * @return Collection<int, ConsumoDia>
      */
-    public function getReceta(): Collection
+    public function getConsumoDias(): Collection
     {
-        return $this->receta;
+        return $this->consumoDias;
     }
 
-    public function addRecetum(Receta $recetum): self
+    public function addConsumoDia(ConsumoDia $consumoDia): self
     {
-        if (!$this->receta->contains($recetum)) {
-            $this->receta[] = $recetum;
+        if (!$this->consumoDias->contains($consumoDia)) {
+            $this->consumoDias[] = $consumoDia;
+            $consumoDia->setIdUsuario($this);
         }
 
         return $this;
     }
 
-    public function removeRecetum(Receta $recetum): self
+    public function removeConsumoDia(ConsumoDia $consumoDia): self
     {
-        $this->receta->removeElement($recetum);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Receta>
-     */
-    public function getRecetaRegistrada(): Collection
-    {
-        return $this->recetaRegistrada;
-    }
-
-    public function addRecetaRegistrada(Receta $recetaRegistrada): self
-    {
-        if (!$this->recetaRegistrada->contains($recetaRegistrada)) {
-            $this->recetaRegistrada[] = $recetaRegistrada;
-            $recetaRegistrada->setUsuarioCreador($this);
-        }
-
-        return $this;
-    }
-
-    public function removeRecetaRegistrada(Receta $recetaRegistrada): self
-    {
-        if ($this->recetaRegistrada->removeElement($recetaRegistrada)) {
+        if ($this->consumoDias->removeElement($consumoDia)) {
             // set the owning side to null (unless already changed)
-            if ($recetaRegistrada->getUsuarioCreador() === $this) {
-                $recetaRegistrada->setUsuarioCreador(null);
+            if ($consumoDia->getIdUsuario() === $this) {
+                $consumoDia->setIdUsuario(null);
             }
         }
 
@@ -336,53 +345,89 @@ class Usuario
     }
 
     /**
-     * @return Collection<int, Ejercicio>
+     * @return Collection<int, Recetas>
      */
-    public function getEjercicioRealizado(): Collection
+    public function getRecetas(): Collection
     {
-        return $this->ejercicioRealizado;
+        return $this->recetas;
     }
 
-    public function addEjercicioRealizado(Ejercicio $ejercicioRealizado): self
+    public function addReceta(Recetas $receta): self
     {
-        if (!$this->ejercicioRealizado->contains($ejercicioRealizado)) {
-            $this->ejercicioRealizado[] = $ejercicioRealizado;
+        if (!$this->recetas->contains($receta)) {
+            $this->recetas[] = $receta;
+            $receta->setIdUsuario($this);
         }
 
         return $this;
     }
 
-    public function removeEjercicioRealizado(Ejercicio $ejercicioRealizado): self
+    public function removeReceta(Recetas $receta): self
     {
-        $this->ejercicioRealizado->removeElement($ejercicioRealizado);
+        if ($this->recetas->removeElement($receta)) {
+            // set the owning side to null (unless already changed)
+            if ($receta->getIdUsuario() === $this) {
+                $receta->setIdUsuario(null);
+            }
+        }
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Ejercicio>
+     * @return Collection<int, Peso>
      */
-    public function getEjercicioPropuesto(): Collection
+    public function getPesos(): Collection
     {
-        return $this->ejercicioPropuesto;
+        return $this->pesos;
     }
 
-    public function addEjercicioPropuesto(Ejercicio $ejercicioPropuesto): self
+    public function addPeso(Peso $peso): self
     {
-        if (!$this->ejercicioPropuesto->contains($ejercicioPropuesto)) {
-            $this->ejercicioPropuesto[] = $ejercicioPropuesto;
-            $ejercicioPropuesto->setUsuarioProponedor($this);
+        if (!$this->pesos->contains($peso)) {
+            $this->pesos[] = $peso;
+            $peso->setIdUsuario($this);
         }
 
         return $this;
     }
 
-    public function removeEjercicioPropuesto(Ejercicio $ejercicioPropuesto): self
+    public function removePeso(Peso $peso): self
     {
-        if ($this->ejercicioPropuesto->removeElement($ejercicioPropuesto)) {
+        if ($this->pesos->removeElement($peso)) {
             // set the owning side to null (unless already changed)
-            if ($ejercicioPropuesto->getUsuarioProponedor() === $this) {
-                $ejercicioPropuesto->setUsuarioProponedor(null);
+            if ($peso->getIdUsuario() === $this) {
+                $peso->setIdUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UsuarioRealizaEjercicio>
+     */
+    public function getUsuarioRealizaEjercicios(): Collection
+    {
+        return $this->usuarioRealizaEjercicios;
+    }
+
+    public function addUsuarioRealizaEjercicio(UsuarioRealizaEjercicio $usuarioRealizaEjercicio): self
+    {
+        if (!$this->usuarioRealizaEjercicios->contains($usuarioRealizaEjercicio)) {
+            $this->usuarioRealizaEjercicios[] = $usuarioRealizaEjercicio;
+            $usuarioRealizaEjercicio->setIdUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuarioRealizaEjercicio(UsuarioRealizaEjercicio $usuarioRealizaEjercicio): self
+    {
+        if ($this->usuarioRealizaEjercicios->removeElement($usuarioRealizaEjercicio)) {
+            // set the owning side to null (unless already changed)
+            if ($usuarioRealizaEjercicio->getIdUsuario() === $this) {
+                $usuarioRealizaEjercicio->setIdUsuario(null);
             }
         }
 
