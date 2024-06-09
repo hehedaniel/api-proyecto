@@ -100,7 +100,7 @@ class PesoController extends AbstractController
    /**
     * @Route("/editar", name="app_peso_editar", methods={"PUT"})
     */
-   public function editar(Request $request, PesoRepository $pesoRepository): Response
+   public function editar(Request $request, PesoRepository $pesoRepository, UsuarioRepository $usuarioRepository): Response
    {
       $data = json_decode($request->getContent(), true);
 
@@ -117,6 +117,16 @@ class PesoController extends AbstractController
 
       if (!$pesoEditar) {
          return RespuestaController::format("404", "No se encontró registro a editar");
+      }
+
+      $usuario = $usuarioRepository->find($data['idUsuario']);
+
+      if ($usuario->getAltura() != 0) {
+         $alturaEnMetros = $usuario->getAltura() / 100;
+         $imc = round($data['peso'] / ($alturaEnMetros * $alturaEnMetros),1);
+         $pesoEditar->setIMC($imc);
+      } else {
+         return RespuestaController::format("400", "Error durante el cálculo del IMC");
       }
 
       $pesoEditar->setPeso($data['peso']);
