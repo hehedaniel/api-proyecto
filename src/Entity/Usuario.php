@@ -2,23 +2,6 @@
 
 namespace App\Entity;
 
-/**
- * Entidad que consta de
- * - nombre: Nombre del usuario
- * - apellidos: Apellidos del usuario
- * - correo: Correo del usuario
- * - contrasena: Contraseña del usuario
- * - edad: Edad del usuario
- * - altura: Altura del usuario
- * - objetivo_opt: Objetivo del usuario
- * - objetivo_num: Número del objetivo del usuario
-
- * - id: Identificador del usuario (automatico)
- * - rol: Rol del usuario (automatico)
- * - correo_v: Correo verififcado (por defecto false)
- */
-
-use App\Repository\UsuarioRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
