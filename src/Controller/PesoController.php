@@ -20,6 +20,11 @@ class PesoController extends AbstractController
 {
    /**
     * @Route("/usuario/{id}", name="app_peso_index", methods={"GET"})
+    *
+    * Método para obtener los pesos de un usuario
+    * @param PesoRepository $pesoRepository
+    * @param UsuarioRepository $usuarioRepository
+    * @return Response con los pesos de un usuario en formato JSON
     */
    public function index($id, PesoRepository $pesoRepository, UsuarioRepository $usuarioRepository): Response
    {
@@ -41,6 +46,12 @@ class PesoController extends AbstractController
 
    /**
     * @Route("/buscar/{id}", name="app_peso_buscar", methods={"GET"})
+    *
+    * Método para obtener un peso en concreto
+    * @param PesoRepository $pesoRepository
+    * @param Request $request
+    * @param int $id
+    * @return Response con el peso en formato JSON
     */
    public function buscar(PesoRepository $pesoRepository, Request $request, $id): Response
    {

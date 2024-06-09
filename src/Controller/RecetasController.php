@@ -21,6 +21,10 @@ class RecetasController extends AbstractController
 {
   /**
    * @Route("/usuario/{idUsuario}", name="app_recetas_index", methods={"GET"})
+   *
+   * Método para obtener las recetas creadas por un usuario
+   * @param RecetasRepository $recetasRepository
+   * @return Response con las recetas de un usuario en formato JSON
    */
   public function index($idUsuario, RecetasRepository $recetasRepository): Response
   {
@@ -41,17 +45,17 @@ class RecetasController extends AbstractController
 
   /**
    * @Route("/unica/{id}", name="app_recetas_buscar", methods={"GET"})
+   *
+   * Método para obtener una receta en concreto
+   * @param RecetasRepository $recetasRepository
+   * @return Response con la receta en formato JSON
    */
   public function buscar($id, RecetasRepository $recetasRepository): Response
   {
     $recetas = $recetasRepository->find($id);
 
     if (!$recetas) {
-      // if ($recetasRepository->findOneBy(["nombre" => $id])) {
-      //   $recetas = $recetasRepository->findOneBy(["nombre" => $id]);
-      // } else {
       return RespuestaController::format("404", "No se ha encontrado la receta");
-      // }
     }
 
     return RespuestaController::format("200", $this->recetasJSON($recetas));
@@ -59,6 +63,12 @@ class RecetasController extends AbstractController
 
   /**
    * @Route("/crear", name="app_recetas_crear", methods={"POST"})
+   *
+   * Método para crear una receta
+   * @param Request $request
+   * @param RecetasRepository $recetasRepository
+   * @param UsuarioRepository $usuarioRepository
+   * @return Response con la receta creada en formato JSON
    */
   public function crear(Request $request, RecetasRepository $recetasRepository, UsuarioRepository $usuarioRepository): Response
   {
@@ -68,6 +78,7 @@ class RecetasController extends AbstractController
       return RespuestaController::format("400", "No se han recibido datos");
     }
 
+    // Compruebo que el usuario no tenga una receta con el mismo nombre
     $recetasExistente = $recetasRepository->findBy(["idUsuario" => $data['idUsuario']]);
 
     foreach ($recetasExistente as $receta) {
@@ -97,6 +108,11 @@ class RecetasController extends AbstractController
 
   /**
    * @Route("/editar", name="app_recetas_editar", methods={"PUT"})
+   *
+   * Método para editar una receta
+   * @param Request $request
+   * @param RecetasRepository $recetasRepository
+   * @return Response con la receta editada en formato JSON
    */
   public function editar(Request $request, RecetasRepository $recetasRepository): Response
   {
@@ -111,8 +127,6 @@ class RecetasController extends AbstractController
     if (!$receta) {
       return RespuestaController::format("404", "No se ha encontrado la receta");
     }
-
-    //Aqui podria comprobar que pertenece al usuario
 
     $receta->setNombre($data['nombre']);
     $receta->setDescripcion($data['descripcion']);
@@ -133,6 +147,11 @@ class RecetasController extends AbstractController
 
   /**
    * @Route("/eliminar", name="app_recetas_eliminar", methods={"DELETE"})
+   *
+   * Método para eliminar una receta
+   * @param Request $request
+   * @param RecetasRepository $recetasRepository
+   * @return Response con el mensaje de éxito o error
    */
   public function eliminar(Request $request, RecetasRepository $recetasRepository): Response
   {
@@ -155,6 +174,10 @@ class RecetasController extends AbstractController
 
   /**
    * @Route("/buscarnombre", name="app_alimento_buscarnombre", methods={"POST"})
+   *
+   * Método para buscar un alimento por su nombre
+   * @param Request $request
+   * @return Response con el alimento encontrado en formato JSON
    */
   public function buscarnombre(Request $request)
   {
@@ -170,6 +193,11 @@ class RecetasController extends AbstractController
     }
   }
 
+  /**
+   * Método para buscar un alimento por su nombre sin necesidad de petición
+   * @param Request $request
+   * @return Response con el alimento encontrado en formato JSON
+   */
   public static function buscarNombreSinPeticion($nombre)
   {
     $cbbdd = new CbbddConsultas();
@@ -182,6 +210,11 @@ class RecetasController extends AbstractController
     }
   }
 
+  /**
+   * Método para buscar un alimento por su nombre sin necesidad de petición obteniendo el ID
+   * @param Request $request
+   * @return Response con el alimento encontrado en formato JSON
+   */
   public static function buscarNombreSinPeticionID($nombre)
   {
     $cbbdd = new CbbddConsultas();
@@ -196,6 +229,11 @@ class RecetasController extends AbstractController
   }
 
 
+  /**
+   * Método para convertir una receta en un array JSON
+   * @param Recetas $receta
+   * @return array con la receta en formato JSON
+   */
   private function recetasJSON(Recetas $receta)
   {
     $recetasJSON = [];
@@ -218,10 +256,16 @@ class RecetasController extends AbstractController
     return $recetasJSON;
   }
 
-  public function buscarAlimento(RecetasRepository $recetasRepository, $id)
+  /**
+   * Método para buscar un alimento por su ID
+   * @param RecetasRepository $recetasRepository
+   * @param $id
+   * @return Response con el alimento encontrado en formato JSON
+   */
+  public function buscarReceta(RecetasRepository $recetasRepository, $id): Response
   {
-    $receta = $recetasRepository->find($id);
+      $receta = $recetasRepository->find($id);
 
-    return $this->recetasJSON($receta);
+      return new Response($this->recetasJSON($receta));
   }
 }

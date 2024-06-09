@@ -232,7 +232,7 @@ class ConsumoDiaController extends AbstractController
             // $nutrientes = $alimentoRepository->find($idComida);
         } else if ($tipoComida == "2") {
             $recetaController = new RecetasController();
-            $nutrientes = $recetaController->buscarAlimento($recetasRepository, $idComida);
+            $nutrientes = $recetaController->buscarReceta($recetasRepository, $idComida);
             // $nutrientes = $recetasRepository->findOneBy(["id"=> $idComida]);
         }
 
