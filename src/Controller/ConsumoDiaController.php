@@ -113,9 +113,10 @@ class ConsumoDiaController extends AbstractController
         // }
         // $consumoDia->setComida($data['comida']);
         $cantidadFloat = floatval($data['cantidad']);
-        var_dump($cantidadFloat);
+        // var_dump($cantidadFloat);
         $consumoDia->setCantidad($cantidadFloat);
         $consumoDia->setMomento($data['momento']);
+        $consumoDia->setIdUsuario($usuarioRepository->find($id));
         $consumoDia->setFecha(new \DateTime($data['fecha']));
         $consumoDia->setHora(new \DateTime($data['hora']));
         $consumoDia->setIdUsuario($usuarioRepository->find($id));

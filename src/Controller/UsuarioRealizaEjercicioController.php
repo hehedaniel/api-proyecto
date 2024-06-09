@@ -25,14 +25,23 @@ class UsuarioRealizaEjercicioController extends AbstractController
    /**
     * @Route("/usuario/{id}", name="usuario_realiza_ejercicio_usuario", methods={"GET"})
     */
-   public function getByUsuario(UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository, $id): Response
+   public function getByUsuario($id, UsuarioRealizaEjercicioRepository $usuarioRealizaEjercicioRepository, EjercicioRepository $ejercicioRepository): Response
    {
-      $usuarioRealizaEjercicio = $usuarioRealizaEjercicioRepository->findBy(["idUsuario" => $id]);
+
+      $fechaActual = new \DateTime();
+      $fechaActualFormatted = $fechaActual->format('Y-m-d');
+      $fecha = new \DateTime($fechaActualFormatted);
+
+      $usuarioRealizaEjercicio = $usuarioRealizaEjercicioRepository->findBy([
+         'idUsuario' => $id,
+         'fecha' => $fecha
+      ]);
 
       $ejerciciosUsuario = [];
 
       foreach ($usuarioRealizaEjercicio as $ejercicioUsuario) {
-         $ejerciciosUsuario[] = $this->usuarioRealizaEjercicioJSON($ejercicioUsuario);
+         $jercicioNombre = $ejercicioRepository->find($ejercicioUsuario->getIdEjercicio())->getNombre();
+         $ejerciciosUsuario[] = $this->usuarioRealizaEjercicioInfoEjercicioJSON($ejercicioUsuario, $jercicioNombre);
       }
 
       return RespuestaController::format("200", $ejerciciosUsuario);
@@ -127,6 +136,33 @@ class UsuarioRealizaEjercicioController extends AbstractController
          "tiempo" => $usuarioRealizaEjercicio->getTiempo(),
          "idEjercicio" => $usuarioRealizaEjercicio->getIdEjercicio(),
          "idUsuario" => $usuarioRealizaEjercicio->getIdUsuario(),
+      ];
+      // foreach ($usuarioRealizaEjercicio as $ejerciciosUsuario) {
+      //    $usuarioRealizaEjercicioJSON[] = [
+      //       "id" => $ejerciciosUsuario->getId(),
+      //       "fecha" => $ejerciciosUsuario->getFecha(),
+      //       "hora" => $ejerciciosUsuario->getHora(),
+      //       "calorias" => $ejerciciosUsuario->getCalorias(),
+      //       "tiempo" => $ejerciciosUsuario->getTiempo(),
+      //       "idEjercicio" => $ejerciciosUsuario->getIdEjercicio(),
+      //       "idUsuario" => $ejerciciosUsuario->getIdUsuario(),
+      //    ];
+      // }
+
+      return $usuarioRealizaEjercicioJSON;
+   }
+
+   public function usuarioRealizaEjercicioInfoEjercicioJSON(UsuarioRealizaEjercicio $usuarioRealizaEjercicio, String $nombreEjercio)
+   {
+      $usuarioRealizaEjercicioJSON = [
+         "id" => $usuarioRealizaEjercicio->getId(),
+         "fecha" => $usuarioRealizaEjercicio->getFecha(),
+         "hora" => $usuarioRealizaEjercicio->getHora(),
+         "calorias" => $usuarioRealizaEjercicio->getCalorias(),
+         "tiempo" => $usuarioRealizaEjercicio->getTiempo(),
+         "idEjercicio" => $usuarioRealizaEjercicio->getIdEjercicio(),
+         "idUsuario" => $usuarioRealizaEjercicio->getIdUsuario(),
+         "ejNombre" => $nombreEjercio
       ];
       // foreach ($usuarioRealizaEjercicio as $ejerciciosUsuario) {
       //    $usuarioRealizaEjercicioJSON[] = [

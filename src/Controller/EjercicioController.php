@@ -42,15 +42,30 @@ class EjercicioController extends AbstractController
      */
     public function buscar($id, EjercicioRepository $ejercicioRepository): Response
     {
-        $ejercicio = $ejercicioRepository->find($id);
+        $fechaActual = new \DateTime();
+        $fechaActualFormatted = $fechaActual->format('Y-m-d');
+
+        // $ejercicio = $ejercicioRepository->findBy(['id' => $id]);
+
+        // Busco todos los ejercicios con el mismo id de usuario y de la misma fecha
+        $ejercicio = $ejercicioRepository->findBy([
+            'idUsuario' => $id,
+            'fecha' => $fechaActualFormatted
+        ]);
 
         if (!$ejercicio) {
             return RespuestaController::format("404", "Ejercicio no encontrado");
         }
 
-        $ejercicioJSON = $this->ejercicioJSON($ejercicio);
+        //Recorro los ejercicios y los guardo en un array
+        $ejerciciosJSON = [];
+        foreach ($ejercicio as $ejercicio) {
+            $ejerciciosJSON[] = $this->ejercicioJSON($ejercicio);
+        }
 
-        return RespuestaController::format("200", $ejercicioJSON);
+        // $ejercicioJSON = $this->ejercicioJSON($ejercicio);
+
+        return RespuestaController::format("200", $ejerciciosJSON);
     }
 
     /**
